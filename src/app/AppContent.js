@@ -359,7 +359,7 @@ function AppContent() {
                             className="button init-button"
                             disabled={isProcessing}
                         >
-                            {isProcessing ? 'Processing...' : 'Initialize Account'}
+                            {isProcessing ? 'Processing...' : 'Initialize'}
                         </button>
                     </div>
                 ) : (

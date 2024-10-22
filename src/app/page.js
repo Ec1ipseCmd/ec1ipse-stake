@@ -19,9 +19,6 @@ function App() {
 
     // Use the environment variable for the network
     const network = process.env.NEXT_PUBLIC_RPC_URL;
-    console.log('Network: ', network);
-
-
 
     return (
         <ConnectionProvider endpoint={network}>

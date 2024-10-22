@@ -6,7 +6,7 @@ body {
     font-family: 'Arial, sans-serif';
     background-color: #121212; /* Very dark grey background */
     min-height: 100vh;
-    color: #ffffff;
+    color: #e0e0e0; /* Light grey text for better contrast */
 }
 
 .container {
@@ -26,32 +26,33 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    padding: 0 0px; /* Add horizontal padding to prevent content from touching the edges */
+    padding: 0 20px; /* Added horizontal padding */
     box-sizing: border-box;
 }
 
 .header h1 {
     margin: 0;
     font-size: 2rem;
+    color: #e0e0e0; /* Light grey for better readability */
 }
 
 .wallet-button {
     padding: 10px 20px;
-    background-color: #ff8c00;
+    background-color: #a16b00; /* Muted orange */
     border: none;
     border-radius: 5px;
-    color: #fff;
+    color: #000; /* Black text */
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
 }
 
 .wallet-button:hover {
-    background-color: #ffa500;
+    background-color: #8c5800; /* Darker muted orange */
 }
 
 .wallet-status {
-    background-color: rgba(255, 255, 255, 0.05); /* Slightly transparent for dark background */
+    background-color: rgba(224, 224, 224, 0.05); /* Slightly transparent light grey */
     padding: 20px;
     border-radius: 10px;
     width: 100%;
@@ -64,6 +65,7 @@ body {
 .wallet-address {
     font-size: 1rem;
     word-break: break-all;
+    color: #e0e0e0; /* Light grey */
 }
 
 .balances {
@@ -80,6 +82,7 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 5px 0;
+    color: #e0e0e0; /* Light grey */
 }
 
 .token-name {
@@ -87,7 +90,7 @@ body {
 }
 
 .card {
-    background-color: rgba(255, 255, 255, 0.05); /* Slightly transparent for dark background */
+    background-color: rgba(224, 224, 224, 0.05); /* Slightly transparent light grey */
     padding: 30px;
     border-radius: 15px;
     width: 100%;
@@ -100,6 +103,7 @@ body {
     margin-top: 0;
     margin-bottom: 20px;
     text-align: center;
+    color: #e0e0e0; /* Light grey */
 }
 
 .input-group {
@@ -115,28 +119,28 @@ body {
     width: 100%;
     max-width: 300px;
     font-size: 1rem;
-    background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent input background */
-    color: #fff;
+    background-color: rgba(224, 224, 224, 0.1); /* Slightly transparent light grey */
+    color: #e0e0e0;
 }
 
 .amount-input::placeholder {
-    color: #ccc;
+    color: #b0b0b0; /* Muted grey */
 }
 
 .amount-input:focus, .select-token:focus {
     outline: none;
-    box-shadow: 0 0 5px #ff8c00;
-    background-color: rgba(255, 255, 255, 0.15); /* Slightly lighter on focus */
+    box-shadow: 0 0 5px #a16b00; /* Muted orange focus */
+    background-color: rgba(224, 224, 224, 0.15); /* Slightly lighter on focus */
 }
 
 .select-token {
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 011 0L8 10.293l5.354-5.647a.5.5 0 11.708.708l-6 6.3a.5.5 0 01-.708 0l-6-6a.5.5 0 010-.708z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 011 0L8 10.293l5.354-5.647a.5.5 0 11.708.708l-6 6.3a.5.5 0 01-.708 0l-6-6a.5.5 0 010-.708z' clip-rule='evenodd'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 16px 16px;
-    background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent select background */
-    color: #fff;
+    background-color: rgba(224, 224, 224, 0.1); /* Slightly transparent light grey */
+    color: #e0e0e0;
     padding-right: 40px; /* Space for the arrow */
 }
 
@@ -155,29 +159,30 @@ body {
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
+    color: #ffffff; /* white text */
     transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
 .stake-button.active {
-    background-color: #4CAF50;
+    background-color: #2e7d32; /* Muted green */
 }
 
 .stake-button.inactive {
-    background-color: #888;
+    background-color: #555555; /* Dark grey */
     cursor: not-allowed;
     opacity: 0.6;
 }
 
 .unstake-button {
-    background-color: #f44336;
+    background-color: #b71c1c; /* Muted red */
 }
 
 .init-button {
-    background-color: #2196F3;
+    background-color: #1565c0; /* Muted blue */
 }
 
 .button:hover:not(:disabled) {
-    opacity: 0.9;
+    opacity: 0.85;
 }
 
 .button:disabled {
@@ -187,16 +192,17 @@ body {
 
 .connect-wallet-message {
     text-align: center;
-    color: #ffeb3b;
+    color: #c7a600; /* Muted yellow */
     margin-top: 20px;
 }
 
 .countdown {
     margin-top: 20px;
-    background-color: rgba(255, 235, 59, 0.2);
+    background-color: rgba(199, 166, 0, 0.2); /* Slightly transparent muted yellow */
     padding: 10px 20px;
     border-radius: 5px;
     text-align: center;
+    color: #e0e0e0; /* Light grey */
 }
 
 @media (min-width: 600px) {
