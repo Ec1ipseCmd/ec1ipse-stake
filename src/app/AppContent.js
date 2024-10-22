@@ -62,32 +62,21 @@ function AppContent() {
         if (pda) setStakePda(new PublicKey(pda));
     }, [mintAddress]);
 
-    const handleInitDelegateBoost = useCallback(async () => {
-        if (!publicKey) {
-            alert('Please connect your wallet');
-            return;
-        }
+    // Helper function to get Delegated Boost Address PDA
+    const getDelegatedBoostAddress = async (staker, mint) => {
+        const programId = new PublicKey('J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we');
+        const managed_proof_address = PublicKey.findProgramAddressSync(
+            [Buffer.from("managed-proof-account"), miner.toBuffer()],
+            programId
+        )[0];
 
-        try {
-            setIsProcessing(true);
-            const transaction = new Transaction();
-            const staker = publicKey;
-            const mint = new PublicKey(mintAddress);
+        const delegated_boost_address = PublicKey.findProgramAddressSync(
+            [Buffer.from("delegated-boost"), staker.toBuffer(), mint.toBuffer(), managed_proof_address.toBuffer()],
+            programId
+        )[0];
 
-            const instruction = await createInitDelegateBoostInstruction(staker, miner, staker, mint);
-            transaction.add(instruction);
-
-            const signature = await sendTransaction(transaction, connection);
-            await connection.confirmTransaction(signature, 'confirmed');
-
-            alert('Boost account initialized successfully!');
-        } catch (error) {
-            console.error('Error initializing boost:', error);
-            alert(`Error initializing boost: ${error.message || error}`);
-        } finally {
-            setIsProcessing(false);
-        }
-    }, [publicKey, sendTransaction, mintAddress, miner, connection]);
+        return delegated_boost_address;
+    };
 
     const handleStakeBoost = useCallback(async () => {
         if (!publicKey) {
@@ -104,16 +93,34 @@ function AppContent() {
         try {
             setIsProcessing(true);
             const transaction = new Transaction();
+            const staker = publicKey;
             const mint = new PublicKey(mintAddress);
             const stakeAmount = BigInt(Math.round(stakeAmountFloat * (10 ** decimals)));
 
-            const instruction = await createStakeBoostInstruction(publicKey, miner, mint, stakeAmount);
-            transaction.add(instruction);
+            // Compute Delegated Boost Address
+            const delegated_boost_address = await getDelegatedBoostAddress(staker, mint);
 
+            // Check if Delegated Boost Account Exists
+            const accountInfo = await connection.getAccountInfo(delegated_boost_address);
+            if (!accountInfo) {
+                // DelegateBoost account does not exist, initialize it
+                const initInstruction = await createInitDelegateBoostInstruction(staker, miner, staker, mint);
+                transaction.add(initInstruction);
+            }
+
+            // Create Stake Boost Instruction
+            const stakeInstruction = await createStakeBoostInstruction(staker, miner, mint, stakeAmount);
+            transaction.add(stakeInstruction);
+
+            // Send Transaction
             const signature = await sendTransaction(transaction, connection);
             await connection.confirmTransaction(signature, 'confirmed');
 
-            alert('Stake transaction sent successfully!');
+            if (!accountInfo) {
+                alert('Boost account initialized and stake transaction sent successfully!');
+            } else {
+                alert('Stake transaction sent successfully!');
+            }
         } catch (error) {
             console.error('Error staking boost:', error);
             alert(`Error staking boost: ${error.message || error}`);
@@ -137,10 +144,11 @@ function AppContent() {
         try {
             setIsProcessing(true);
             const transaction = new Transaction();
+            const staker = publicKey;
             const mint = new PublicKey(mintAddress);
             const unstakeAmount = BigInt(Math.round(unstakeAmountFloat * (10 ** decimals)));
 
-            const instruction = await createUnstakeBoostInstruction(publicKey, miner, mint, unstakeAmount);
+            const instruction = await createUnstakeBoostInstruction(staker, miner, mint, unstakeAmount);
             transaction.add(instruction);
 
             const signature = await sendTransaction(transaction, connection);
@@ -156,7 +164,6 @@ function AppContent() {
     }, [publicKey, sendTransaction, amount, mintAddress, decimals, miner, connection]);
 
     const createStakeBoostInstruction = async (staker, miner, mint, amount) => {
-        
         try {
             const programId = new PublicKey('J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we');
             const boostProgramId = new PublicKey('boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc');
@@ -369,13 +376,6 @@ function AppContent() {
                             disabled={isProcessing}
                         >
                             {isProcessing ? 'Processing...' : 'Unstake'}
-                        </button>
-                        <button
-                            onClick={handleInitDelegateBoost}
-                            className="button init-button"
-                            disabled={isProcessing}
-                        >
-                            {isProcessing ? 'Processing...' : 'Initialize'}
                         </button>
                     </div>
                 ) : (
