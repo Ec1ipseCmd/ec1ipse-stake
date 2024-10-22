@@ -120,7 +120,7 @@ function AppContent() {
     const [countdown, setCountdown] = useState('');
 
     // Initialize the connection using useMemo for performance optimization
-    const connection = useMemo(() => new Connection(process.env.NEXT_PUBLIC_RPC_URL), []);
+    const connection = useMemo(() => new Connection(process.env.RPC_URL), []);
     const miner = useMemo(() => new PublicKey('mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH'), []);
 
     // Fetch token decimals dynamically
@@ -603,7 +603,7 @@ function App() {
         []
     );
 
-    const network = process.env.NEXT_PUBLIC_RPC_URL;
+    const network = process.env.RPC_URL;
 
     return (
         <ConnectionProvider endpoint={network}>
