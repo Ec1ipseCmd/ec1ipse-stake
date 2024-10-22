@@ -32,6 +32,7 @@ function AppContent() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [stake_pda, setStakePda] = useState(new PublicKey('2fpUVijnhKkDoSQaHfDVPpLmeKRpcGtNRQgwjBk4Jd5E'));
     const [isStakeActive, setIsStakeActive] = useState(false);
+    const [countdown, setCountdown] = useState('');
 
     const connection = useMemo(() => new Connection(process.env.NEXT_PUBLIC_RPC_URL), []);
 
@@ -310,7 +311,14 @@ function AppContent() {
             </header>
 
             <WalletStatus connection={connection} />
-            <StakingTimer isStakeActive={isStakeActive} setIsStakeActive={setIsStakeActive} />
+            
+            {/* Pass the state and setter functions as props */}
+            <StakingTimer 
+                isStakeActive={isStakeActive} 
+                setIsStakeActive={setIsStakeActive} 
+                countdown={countdown} 
+                setCountdown={setCountdown} 
+            />
 
             <div className="card">
                 <h2>Manage Your Stake</h2>

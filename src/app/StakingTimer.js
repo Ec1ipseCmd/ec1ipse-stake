@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import './styles.css';
 
-function StakingTimer() {
-    const [isStakeActive, setIsStakeActive] = useState(false);
-    const [countdown, setCountdown] = useState('');
-
+function StakingTimer({ isStakeActive, setIsStakeActive, countdown, setCountdown }) {
     useEffect(() => {
         const updateStakeAvailability = () => {
             const now = new Date();
@@ -39,7 +36,7 @@ function StakingTimer() {
         const intervalId = setInterval(updateStakeAvailability, 1000);
 
         return () => clearInterval(intervalId);
-    }, []);
+    }, [setIsStakeActive, setCountdown]);
 
     return (
         <div className="staking-timer">
