@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey, Connection, Transaction, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, Connection, Transaction, SystemProgram, TransactionInstruction, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { getMint, getAssociatedTokenAddressSync  } from '@solana/spl-token';
 import WalletStatus from './WalletStatus';
 import StakingTimer from './StakingTimer';
@@ -271,15 +271,22 @@ function AppContent() {
     const createInitDelegateBoostInstruction = async (staker, miner, payer, mint) => {
         try {
             const programId = new PublicKey('J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we');
+            const boostProgramId = new PublicKey('boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc');
+            const TOKEN_PROGRAM_ID = getTokenProgramId();
 
             const managed_proof_address = PublicKey.findProgramAddressSync(
                 [Buffer.from("managed-proof-account"), miner.toBuffer()],
                 programId
             )[0];
 
-            const boost_pda = PublicKey.findProgramAddressSync(
-                [Buffer.from("delegated-boost"), mint.toBuffer()],
+            const delegated_boost_address = PublicKey.findProgramAddressSync(
+                [Buffer.from("delegated-boost"), staker.toBuffer(), mint.toBuffer(), managed_proof_address.toBuffer()],
                 programId
+            )[0];
+            
+            const boost_pda = PublicKey.findProgramAddressSync(
+                [Buffer.from("boost"), mint.toBuffer()],
+                boostProgramId
             )[0];
 
             const instruction = new TransactionInstruction({
@@ -288,8 +295,9 @@ function AppContent() {
                     { pubkey: miner, isSigner: false, isWritable: true },
                     { pubkey: payer, isSigner: true, isWritable: true },
                     { pubkey: managed_proof_address, isSigner: false, isWritable: true },
-                    { pubkey: boost_pda, isSigner: false, isWritable: true },
+                    { pubkey: delegated_boost_address, isSigner: false, isWritable: true },
                     { pubkey: mint, isSigner: false, isWritable: false },
+                    { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
                     { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
                 ],
                 programId: programId,

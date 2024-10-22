@@ -5,7 +5,7 @@ import '@solana/wallet-adapter-react-ui/styles.css'; // Wallet Adapter CSS
 
 export const metadata = {
   title: 'Ec1ipse Stake',
-  description: 'Your staking platform',
+  description: 'A website to stake your Ore.',
 };
 
 export default function RootLayout({ children }) {
