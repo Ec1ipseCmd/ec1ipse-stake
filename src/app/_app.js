@@ -17,7 +17,7 @@ function MyApp({ Component, pageProps }) {
         []
     );
 
-    const network = process.env.NEXT_PUBLIC_RPC_URL;
+    const network = process.env.RPC_URL;
 
     return (
         <ConnectionProvider endpoint={network}>

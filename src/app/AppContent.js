@@ -33,7 +33,7 @@ function AppContent() {
     const [stake_pda, setStakePda] = useState(new PublicKey('2fpUVijnhKkDoSQaHfDVPpLmeKRpcGtNRQgwjBk4Jd5E'));
     const [isStakeActive, setIsStakeActive] = useState(false);
 
-    const connection = useMemo(() => new Connection(process.env.NEXT_PUBLIC_RPC_URL), []);
+    const connection = useMemo(() => new Connection(process.env.RPC_URL), []);
 
     const miner = useMemo(() => new PublicKey('mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH'), []);
 
