@@ -33,7 +33,7 @@ function AppContent() {
     const [stake_pda, setStakePda] = useState(new PublicKey('2fpUVijnhKkDoSQaHfDVPpLmeKRpcGtNRQgwjBk4Jd5E'));
     const [isStakeActive, setIsStakeActive] = useState(false);
 
-    const connection = useMemo(() => new Connection(process.env.RPC_URL), []);
+    const connection = useMemo(() => new Connection(process.env.NEXT_PUBLIC_RPC_URL), []);
 
     const miner = useMemo(() => new PublicKey('mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH'), []);
 
@@ -155,6 +155,7 @@ function AppContent() {
     }, [publicKey, sendTransaction, amount, mintAddress, decimals, miner, connection]);
 
     const createStakeBoostInstruction = async (staker, miner, mint, amount) => {
+        
         try {
             const programId = new PublicKey('J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we');
             const boostProgramId = new PublicKey('boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc');
