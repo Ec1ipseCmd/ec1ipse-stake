@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import './styles.css';
 
 function StakingTimer() {
     const [isStakeActive, setIsStakeActive] = useState(false);

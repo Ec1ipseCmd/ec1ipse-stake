@@ -6,8 +6,13 @@ import { PublicKey, Connection, Transaction, SystemProgram, TransactionInstructi
 import { getMint, getAssociatedTokenAddressSync  } from '@solana/spl-token';
 import WalletStatus from './WalletStatus';
 import StakingTimer from './StakingTimer';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import dynamic from 'next/dynamic';
 
+const WalletMultiButton = dynamic(
+    () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
+    { ssr: false }
+);
+import './styles.css';
 import { Buffer } from 'buffer';
 
 const TOKEN_LIST = [
@@ -29,7 +34,7 @@ function AppContent() {
     const [isStakeActive, setIsStakeActive] = useState(false);
 
     const connection = useMemo(() => new Connection(process.env.NEXT_PUBLIC_RPC_URL), []);
-    
+
     const miner = useMemo(() => new PublicKey('mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH'), []);
 
     useEffect(() => {
@@ -339,14 +344,14 @@ function AppContent() {
                             className={`button stake-button ${isStakeActive ? 'active' : 'inactive'}`}
                             disabled={!isStakeActive || isProcessing}
                         >
-                            {isProcessing ? 'Processing...' : 'Stake Boost'}
+                            {isProcessing ? 'Processing...' : 'Stake'}
                         </button>
                         <button
                             onClick={handleUnstakeBoost}
                             className="button unstake-button"
                             disabled={isProcessing}
                         >
-                            {isProcessing ? 'Processing...' : 'Unstake Boost'}
+                            {isProcessing ? 'Processing...' : 'Unstake'}
                         </button>
                         <button
                             onClick={handleInitDelegateBoost}

@@ -8,8 +8,6 @@ import AppContent from './AppContent';
 
 import './styles.css';
 
-import '@solana/wallet-adapter-react-ui/styles.css';
-
 function MyApp({ Component, pageProps }) {
     const wallets = useMemo(
         () => [
