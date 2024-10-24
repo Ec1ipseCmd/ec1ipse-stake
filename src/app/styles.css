@@ -1,12 +1,18 @@
 /* styles.css */
 
-body {
+/* Reset and Base Styles */
+body, html {
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-family: 'Arial, sans-serif';
     background-color: #121212; /* Very dark grey background */
-    min-height: 100vh;
     color: #e0e0e0; /* Light grey text for better contrast */
+    box-sizing: border-box;
 }
 
 .container {
@@ -19,6 +25,7 @@ body {
     box-sizing: border-box;
 }
 
+/* Header Styles */
 .header {
     width: 100%;
     max-width: 800px;
@@ -36,6 +43,7 @@ body {
     color: #e0e0e0; /* Light grey for better readability */
 }
 
+/* Wallet Button Styles */
 .wallet-button {
     padding: 10px 20px;
     background-color: #a16b00; /* Muted orange */
@@ -51,6 +59,7 @@ body {
     background-color: #8c5800; /* Darker muted orange */
 }
 
+/* Wallet Status Styles */
 .wallet-status {
     background-color: rgba(224, 224, 224, 0.05); /* Slightly transparent light grey */
     padding: 20px;
@@ -62,33 +71,66 @@ body {
     box-sizing: border-box;
 }
 
-.wallet-address {
-    font-size: 1rem;
-    word-break: break-all;
+.wallet-status h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
     color: #e0e0e0; /* Light grey */
 }
 
-.balances {
-    margin-top: 15px;
+.balances,
+.staked-balance-section {
+    margin-top: 10px; /* Reduce the margin above the sections */
+    padding: 10px 0;  /* Reduced padding to tighten the layout */
+    font-size: 14px;
+    font-weight: lighter;
 }
 
 .balance-list {
     list-style-type: none;
-    padding: 0;
-    margin: 0;
+    padding: 0; 
+    margin: 0; /* Remove margins around the list */
 }
 
 .balance-list li {
     display: flex;
     justify-content: space-between;
-    padding: 5px 0;
-    color: #e0e0e0; /* Light grey */
+    padding: 0px 0; /* Reduce padding between list items */
+    margin: 0; /* Remove extra margin between list items */
 }
 
 .token-name {
-    font-weight: bold;
+    font-weight: lighter;
 }
 
+/* Separator Line */
+.separator {
+    margin: 20px 0;
+    border: none;
+    border-top: 2px solid #e0e0e0; /* Light grey line */
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Staked Balance Section */
+.staked-balance-section {
+    text-align: center;
+}
+
+.staked-balance-section h3 {
+    margin-bottom: 10px;
+    color: #e0e0e0; /* Light grey */
+}
+
+.staked-balance-section p {
+    font-size: 1.2em;
+    color: #e0e0e0; /* Light grey */
+}
+
+.staked-balance-section .error {
+    color: #c70039; /* Bright red for errors */
+}
+
+/* Card Styles */
 .card {
     background-color: rgba(224, 224, 224, 0.05); /* Slightly transparent light grey */
     padding: 30px;
@@ -106,6 +148,7 @@ body {
     color: #e0e0e0; /* Light grey */
 }
 
+/* Input Group Styles */
 .input-group {
     margin-bottom: 20px;
     display: flex;
@@ -133,43 +176,93 @@ body {
     background-color: rgba(224, 224, 224, 0.15); /* Slightly lighter on focus */
 }
 
+/* Button Group Styles */
 .button-group {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+/* General Button Styles */
 .button {
-    padding: 10px 20px;
+    width: auto; /* Allow buttons to size based on content */
+    max-width: none; /* Remove the maximum width constraint */
+    padding: 8px 16px; /* Reduce padding for a more compact button */
     margin: 5px 0;
-    width: 100%;
-    max-width: 300px;
     border: none;
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
-    color: #ffffff; /* white text */
+    color: #ffffff; /* White text */
     transition: background-color 0.3s ease, opacity 0.3s ease;
+    white-space: nowrap; /* Prevent text from wrapping to the next line */
+    box-sizing: border-box;
 }
 
 .stake-button.active {
-    background-color: #2e7d32; /* Muted green */
+    background-color: #4caf50; /* Green */
+    cursor: pointer;
 }
 
 .stake-button.inactive {
-    background-color: #555555; /* Dark grey */
+    background-color: #454545; /* Dark grey */
     cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.stake-button:disabled {
     opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .unstake-button {
-    background-color: #b71c1c; /* Muted red */
+    background-color: #b71c1c; /* Dark red */
+}
+
+.unstake-button:hover:not(:disabled) {
+    background-color: #a31616; /* Darker red */
+    opacity: 0.85;
+}
+
+.unstake-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.convert-button {
+    background-color: #1565c0; /* Blue */
+    color: #ffffff;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.convert-button:hover:not(:disabled) {
+    background-color: #0d47a1; /* Darker blue */
+    opacity: 0.85;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.convert-button:disabled {
+    opacity: 0.6;
+    text-decoration: line-through;
+    cursor: not-allowed;
 }
 
 .init-button {
-    background-color: #1565c0; /* Muted blue */
+    background-color: #1565c0;
 }
 
+.init-button:hover:not(:disabled) {
+    background-color: #0d47a1;
+    opacity: 0.85;
+}
+
+.init-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Hover and Disabled States for All Buttons */
 .button:hover:not(:disabled) {
     opacity: 0.85;
 }
@@ -179,12 +272,14 @@ body {
     cursor: not-allowed;
 }
 
+/* Connect Wallet Message Styles */
 .connect-wallet-message {
     text-align: center;
     color: #c7a600; /* Muted yellow */
     margin-top: 20px;
 }
 
+/* Countdown Timer Styles */
 .countdown {
     margin-top: 20px;
     background-color: rgba(199, 166, 0, 0.2); /* Slightly transparent muted yellow */
@@ -194,6 +289,7 @@ body {
     color: #e0e0e0; /* Light grey */
 }
 
+/* Responsive Design for Button Group */
 @media (min-width: 600px) {
     .button-group {
         flex-direction: row;
@@ -205,31 +301,7 @@ body {
     }
 }
 
-/* Additional Centering Fix */
-body, html {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.stake-button.active {
-    background-color: #4caf50; /* Green */
-    cursor: pointer;
-}
-
-.stake-button.inactive {
-    background-color: #454545; /* Gray */
-    cursor: not-allowed;
-    text-decoration: line-through
-
-}
-
-.stake-button:disabled {
-    opacity: 0.6;
-}
-
+/* Select Token Dropdown Styles */
 .select-token {
     padding: 10px;
     border: none;
@@ -244,14 +316,51 @@ body, html {
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 16px 16px;
-    background-color: #333333; /* Ensure solid dark grey */
-    color: #e0e0e0;
     padding-right: 40px; /* Space for the arrow */
 }
 
-/* Optional: Adjust the focus state for better visibility */
+/* Focus State for Select Token Dropdown */
 .select-token:focus {
     outline: none;
     box-shadow: 0 0 5px #a16b00; /* Muted orange focus */
     background-color: #444444; /* Slightly lighter dark grey on focus */
 }
+
+/* Wallet Address Container */
+.wallet-address-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+/* Copy Button Specific Styles */
+.copy-button {
+    margin-left: 10px; /* Space between address and button */
+    background-color: #a16b0000; /* Same as .wallet-button */
+    color: #000; /* Black text as per .wallet-button */
+    padding: 2px 4px; /* Consistent padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;    
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    font-size: 1rem;
+}
+
+.copy-button:hover {
+    background-color: #8c590025; /* Darker muted orange on hover */
+}
+
+/* Copy Feedback Message */
+.copy-feedback {
+    margin-left: 10px;
+    color: #a16b00; /* Muted orange to match the theme */
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.large-heading {
+    font-size: 24px;
+    font-weight: bold; /* Adjust the size as needed */
+    /* You can add more styles here */
+  }

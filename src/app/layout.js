@@ -1,8 +1,7 @@
 import localFont from "next/font/local";
 import './globals.css';
-// import './styles.css';
-import '@solana/wallet-adapter-react-ui/styles.css'; // Wallet Adapter CSS
-
+import './styles.css';
+import '@solana/wallet-adapter-react-ui/styles.css';
 export const metadata = {
   title: 'Ec1ipse Stake',
   description: 'A website to stake your Ore.',
@@ -16,8 +15,6 @@ export default function RootLayout({ children }) {
   );
 }
 
-
-
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -28,15 +25,3 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
-
-// export default function RootLayout({ children }) {
-//   return (
-//     <html lang="en">
-//       <body
-//         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-//       >
-//         {children}
-//       </body>
-//     </html>
-//   );
-// }
