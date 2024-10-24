@@ -69,6 +69,7 @@ function AppContent() {
     // Helper function to get Delegated Boost Address PDA
     const getDelegatedBoostAddress = async (staker, mint) => {
         const programId = new PublicKey('J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we');
+
         const managed_proof_address = PublicKey.findProgramAddressSync(
             [Buffer.from("managed-proof-account"), miner.toBuffer()],
             programId
@@ -174,7 +175,7 @@ function AppContent() {
         }
     }, [publicKey, sendTransaction, amount, mintAddress, decimals, miner, connection]);
 
-    // **Modified Handler for Boost Transaction**
+    // **Modified Handler for CONVERTING**
     const handleBoostTransaction = useCallback(async () => {
         if (!publicKey) {
             alert('Please connect your wallet');
@@ -186,7 +187,6 @@ function AppContent() {
             const staker = publicKey;
             const mint = new PublicKey(mintAddress);
 
-            // **Fetch the entire staked amount from the API (v2)**
             const apiUrl = `https://ec1ipse.me/miner/boost/stake?pubkey=${publicKey.toBase58()}&mint=${mintAddress}`;
             const response = await fetch(apiUrl);
 
@@ -213,19 +213,9 @@ function AppContent() {
             transaction.add(unstakeInstructionV1);
             console.log("unstakeInstructionV1");
 
-            const delegated_boost_address = await getDelegatedBoostAddress(staker, mint);
-
-            // Check if Delegated Boost Account Exists
-            const accountInfo = await connection.getAccountInfo(delegated_boost_address);
-            if (!accountInfo) {
-                console.log("Check for Delegate Boost Account");
-
-
-                // DelegateBoost account does not exist, initialize it
-                const initInstruction = await createInitDelegateBoostInstruction(staker, miner, staker, mint);
-                transaction.add(initInstruction);
-                console.log("No Delegate Boost Account found, creating");
-            }
+            // Create Stake Boost Instruction
+            const stakeInstruction = await createStakeBoostInstruction(staker, miner, mint, amountBigInt);
+            transaction.add(stakeInstruction);
 
             // Send Transaction
             const signature = await sendTransaction(transaction, connection);
@@ -355,7 +345,7 @@ function AppContent() {
                     { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
                 ],
                 programId: programId,
-                data: Buffer.concat([Buffer.from([6]), amountBuffer]) // Instruction data: [6] + amount
+                data: Buffer.concat([Buffer.from([7]), amountBuffer]) // Instruction data: [7] + amount
             });
 
             return instruction_v1;
