@@ -1,4 +1,5 @@
 "use client"; 
+import "../styles.css";
 import React, { useEffect } from 'react';
 
 function StakingTimer({ 
@@ -11,8 +12,8 @@ function StakingTimer({
         const updateStakeAvailability = () => {
             const now = new Date();
             const secondsSinceTopOfHour = now.getMinutes() * 60 + now.getSeconds();
-            const totalCycleDuration = 600; // 10 minutes (600 seconds)
-            const activeDurationSeconds = 300; // 5 minutes (300 seconds)
+            const totalCycleDuration = 600;
+            const activeDurationSeconds = 300;
             const secondsPastInterval = secondsSinceTopOfHour % totalCycleDuration;
 
             if (secondsPastInterval < activeDurationSeconds) {
@@ -48,7 +49,7 @@ function StakingTimer({
             {isStakeActive ? (
                 <p className="stake-active">Stake Boost is currently active.</p>
             ) : (
-                countdown && <p className="stake-countdown">Stake Boost is available next in: {countdown}</p>
+                countdown && <p className="stake-countdown">Stake Boost is available in: {countdown}</p>
             )}
         </div>
     );

@@ -1,139 +1,182 @@
-/* styles.css */
-
-/* Reset and Base Styles */
-body, html {
+body {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
+    font-family: 'Arial, sans-serif';
+    background-color: #121212;
+    color: #e0e0e0;
+    box-sizing: border-box;
+    position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;
-    font-family: 'Arial, sans-serif';
-    background-color: #121212; /* Very dark grey background */
-    color: #e0e0e0; /* Light grey text for better contrast */
-    box-sizing: border-box;
+}
+
+#tsparticles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
 }
 
 .container {
-    display: flex;
+    display: block;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Centers content vertically */
+    justify-content: center;
     padding: 20px;
-    min-height: 100vh; /* Ensure the container takes full viewport height for vertical centering */
+    min-height: 100vh;
     box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    max-width: 550px;
+    width: 90%;
+    margin: 0 auto;
 }
 
-/* Header Styles */
 .header {
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    padding: 0 20px; /* Added horizontal padding */
+    padding: 0 0px;
     box-sizing: border-box;
 }
 
-.header h1 {
-    margin: 0;
-    font-size: 2rem;
-    color: #e0e0e0; /* Light grey for better readability */
+.logo-title-container {
+    display: flex;
+    align-items: flex-end;
 }
 
-/* Wallet Button Styles */
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+}
+
+.site-title {
+    margin-left: 15px;
+    font-size: 2rem;
+    color: #e0e0e0;
+    font-weight: bold;
+}
+
 .wallet-button {
     padding: 10px 20px;
-    background-color: #a16b00; /* Muted orange */
+    background-color: #a16b00;
     border: none;
     border-radius: 5px;
-    color: #000; /* Black text */
+    color: #000;
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
 }
 
 .wallet-button:hover {
-    background-color: #8c5800; /* Darker muted orange */
+    background-color: #8c5800;
 }
 
-/* Wallet Status Styles */
 .wallet-status {
-    background-color: rgba(224, 224, 224, 0.05); /* Slightly transparent light grey */
-    padding: 20px;
+    background-color: rgba(224, 224, 224, 0.05);
+    padding: 25px;
     border-radius: 10px;
     width: 100%;
     max-width: 800px;
     margin-bottom: 30px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    text-align: left;
 }
 
 .wallet-status h2 {
     margin-top: 0;
     margin-bottom: 15px;
-    color: #e0e0e0; /* Light grey */
+    color: #e0e0e0;
 }
 
 .balances,
 .staked-balance-section {
-    margin-top: 10px; /* Reduce the margin above the sections */
-    padding: 10px 0;  /* Reduced padding to tighten the layout */
-    font-size: 14px;
+    margin-top: 10px;
+    padding: 0px 0px;
+    font-size: 15px;
     font-weight: lighter;
+    max-width: 1000px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .balance-list {
     list-style-type: none;
     padding: 0; 
-    margin: 0; /* Remove margins around the list */
+    margin: 0;
 }
 
 .balance-list li {
     display: flex;
     justify-content: space-between;
-    padding: 0px 0; /* Reduce padding between list items */
-    margin: 0; /* Remove extra margin between list items */
+    align-items: center;
+    padding: 3px 0;
+    margin: 0;
+    border-bottom: 1px solid rgba(224, 224, 224, 0.1);
+}
+
+.balance-list li:last-child {
+    border-bottom: none;
 }
 
 .token-name {
     font-weight: lighter;
+    margin-right: 50px;
+    text-align: left;
 }
 
-/* Separator Line */
+.token-amount {
+    text-align: right;
+    min-width: 100px;
+}
+
 .separator {
     margin: 20px 0;
     border: none;
-    border-top: 2px solid #e0e0e0; /* Light grey line */
+    border-top: 2px solid #e0e0e0;
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
 }
 
-/* Staked Balance Section */
 .staked-balance-section {
-    text-align: center;
+    text-align: left;
 }
 
 .staked-balance-section h3 {
     margin-bottom: 10px;
-    color: #e0e0e0; /* Light grey */
+    color: #e0e0e0;
 }
 
 .staked-balance-section p {
     font-size: 1.2em;
-    color: #e0e0e0; /* Light grey */
+    color: #e0e0e0;
 }
 
 .staked-balance-section .error {
-    color: #c70039; /* Bright red for errors */
+    color: #c70039;
 }
 
-/* Card Styles */
 .card {
-    background-color: rgba(224, 224, 224, 0.05); /* Slightly transparent light grey */
-    padding: 30px;
+    background-color: rgba(224, 224, 224, 0.05);
+    padding: 20px;
     border-radius: 15px;
     width: 100%;
     max-width: 500px;
@@ -145,10 +188,9 @@ body, html {
     margin-top: 0;
     margin-bottom: 20px;
     text-align: center;
-    color: #e0e0e0; /* Light grey */
+    color: #e0e0e0;
 }
 
-/* Input Group Styles */
 .input-group {
     margin-bottom: 20px;
     display: flex;
@@ -162,107 +204,48 @@ body, html {
     width: 100%;
     max-width: 300px;
     font-size: 1rem;
-    background-color: rgba(224, 224, 224, 0.1); /* Slightly transparent light grey */
+    background-color: rgba(224, 224, 224, 0.1);
     color: #e0e0e0;
 }
 
 .amount-input::placeholder {
-    color: #b0b0b0; /* Muted grey */
+    color: #b0b0b0;
 }
 
 .amount-input:focus, .select-token:focus {
     outline: none;
-    box-shadow: 0 0 5px #a16b00; /* Muted orange focus */
-    background-color: rgba(224, 224, 224, 0.15); /* Slightly lighter on focus */
+    box-shadow: 0 0 5px #a16b00;
+    background-color: rgba(224, 224, 224, 0.15);
 }
 
-/* Button Group Styles */
 .button-group {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 0;
 }
 
-/* General Button Styles */
 .button {
-    width: auto; /* Allow buttons to size based on content */
-    max-width: none; /* Remove the maximum width constraint */
-    padding: 8px 16px; /* Reduce padding for a more compact button */
-    margin: 5px 0;
+    width: auto;
+    max-width: none;
+    padding: 8px 16px;
+    margin: 0;
     border: none;
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
-    color: #ffffff; /* White text */
-    transition: background-color 0.3s ease, opacity 0.3s ease;
-    white-space: nowrap; /* Prevent text from wrapping to the next line */
-    box-sizing: border-box;
-}
-
-.stake-button.active {
-    background-color: #4caf50; /* Green */
-    cursor: pointer;
-}
-
-.stake-button.inactive {
-    background-color: #454545; /* Dark grey */
-    cursor: not-allowed;
-    text-decoration: line-through;
-}
-
-.stake-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.unstake-button {
-    background-color: #b71c1c; /* Dark red */
-}
-
-.unstake-button:hover:not(:disabled) {
-    background-color: #a31616; /* Darker red */
-    opacity: 0.85;
-}
-
-.unstake-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.convert-button {
-    background-color: #1565c0; /* Blue */
     color: #ffffff;
     transition: background-color 0.3s ease, opacity 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    box-sizing: border-box;
+    background-color: #333333;
 }
 
-.convert-button:hover:not(:disabled) {
-    background-color: #0d47a1; /* Darker blue */
-    opacity: 0.85;
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-.convert-button:disabled {
-    opacity: 0.6;
-    text-decoration: line-through;
-    cursor: not-allowed;
-}
-
-.init-button {
-    background-color: #1565c0;
-}
-
-.init-button:hover:not(:disabled) {
-    background-color: #0d47a1;
-    opacity: 0.85;
-}
-
-.init-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Hover and Disabled States for All Buttons */
 .button:hover:not(:disabled) {
     opacity: 0.85;
 }
@@ -272,36 +255,46 @@ body, html {
     cursor: not-allowed;
 }
 
-/* Connect Wallet Message Styles */
+.stake-button.active {
+    background-color: #4caf50;
+    cursor: pointer;
+}
+
+.stake-button.inactive {
+    background-color: #454545;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.unstake-button {
+    background-color: #b71c1c;
+}
+
+.unstake-button:hover:not(:disabled) {
+    background-color: #a31616;
+    opacity: 0.85;
+}
+
+.unstake-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .connect-wallet-message {
     text-align: center;
-    color: #c7a600; /* Muted yellow */
+    color: #c7a600;
     margin-top: 20px;
 }
 
-/* Countdown Timer Styles */
 .countdown {
     margin-top: 20px;
-    background-color: rgba(199, 166, 0, 0.2); /* Slightly transparent muted yellow */
+    background-color: rgba(199, 166, 0, 0.2);
     padding: 10px 20px;
     border-radius: 5px;
     text-align: center;
-    color: #e0e0e0; /* Light grey */
+    color: #e0e0e0;
 }
 
-/* Responsive Design for Button Group */
-@media (min-width: 600px) {
-    .button-group {
-        flex-direction: row;
-        justify-content: space-between;
-    }
-
-    .button {
-        margin: 0 10px;
-    }
-}
-
-/* Select Token Dropdown Styles */
 .select-token {
     padding: 10px;
     border: none;
@@ -309,58 +302,290 @@ body, html {
     width: 100%;
     max-width: 300px;
     font-size: 1rem;
-    background-color: #333333; /* Solid dark grey */
-    color: #e0e0e0; /* Light grey text for contrast */
-    appearance: none; /* Remove default styling */
+    background-color: #333333;
+    color: #e0e0e0;
+    appearance: none;
     background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 011 0L8 10.293l5.354-5.647a.5.5 0 11.708.708l-6 6.3a.5.5 0 01-.708 0l-6-6a.5.5 0 010-.708z' clip-rule='evenodd'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 16px 16px;
-    padding-right: 40px; /* Space for the arrow */
+    padding-right: 40px;
 }
 
-/* Focus State for Select Token Dropdown */
 .select-token:focus {
     outline: none;
-    box-shadow: 0 0 5px #a16b00; /* Muted orange focus */
-    background-color: #444444; /* Slightly lighter dark grey on focus */
+    box-shadow: 0 0 5px #a16b00;
+    background-color: #444444;
 }
 
-/* Wallet Address Container */
 .wallet-address-container {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 600px;
 }
 
-/* Copy Button Specific Styles */
 .copy-button {
-    margin-left: 10px; /* Space between address and button */
-    background-color: #a16b0000; /* Same as .wallet-button */
-    color: #000; /* Black text as per .wallet-button */
-    padding: 2px 4px; /* Consistent padding */
+    background-color: rgba(161, 107, 0, 0.1);
+    color: #000;
+    padding: 5px 10px;
     border: none;
     border-radius: 5px;
-    cursor: pointer;    
+    cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
     font-size: 1rem;
 }
 
 .copy-button:hover {
-    background-color: #8c590025; /* Darker muted orange on hover */
+    background-color: rgba(140, 89, 0, 0.15);
 }
 
-/* Copy Feedback Message */
 .copy-feedback {
-    margin-left: 10px;
-    color: #a16b00; /* Muted orange to match the theme */
+    display: block;
+    margin-top: 5px;
+    color: #a16b00;
     font-size: 0.9em;
-    font-weight: bold;
 }
 
 .large-heading {
     font-size: 24px;
-    font-weight: bold; /* Adjust the size as needed */
-    /* You can add more styles here */
-  }
+    font-weight: bold;
+}
+
+body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(18, 18, 18, 0.5);
+    pointer-events: none;
+    z-index: 0;
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .logo-title-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .site-title {
+        margin-left: 0;
+        margin-top: 10px;
+        font-size: 1.8rem;
+    }
+
+    .wallet-button {
+        margin-top: 15px;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .balance-list li {
+        font-size: 1.1em;
+    }
+
+    .card {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .button-group .button {
+        width: 100%;
+        max-width: 300px;
+        margin: 5px 0;
+    }
+
+    .wallet-status {
+        align-items: center;
+        text-align: center;
+    }
+
+    .wallet-address-container {
+        max-width: 100%;
+    }
+
+    .balance-list li {
+        padding: 15px 0;
+    }
+
+    .stake-countdown {
+        margin-top: 20px;
+        background-color: rgba(161, 107, 0, 0.1);
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-align: center;
+        color: #e0e0e0;
+        font-size: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .stake-countdown {
+            font-size: 0.95rem;
+            padding: 8px 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stake-countdown {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+        }
+    }
+
+    .stake-active {
+        margin-top: 20px;
+        background-color: rgba(76, 175, 80, 0.1);
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-align: center;
+        color: #e0e0e0;
+        font-size: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .stake-active:hover {
+        background-color: rgba(76, 175, 80, 0.15);
+    }
+
+    @media (max-width: 768px) {
+        .stake-active {
+            font-size: 0.95rem;
+            padding: 8px 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stake-active {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 0 10px;
+    }
+
+    .logo {
+        width: 80px;
+    }
+
+    .site-title {
+        font-size: 1.5rem;
+    }
+
+    .wallet-button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    .wallet-status {
+        padding: 15px;
+        max-width: 100%;
+    }
+
+    .wallet-address-container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        max-width: 90%;
+    }
+
+    .wallet-address {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .copy-button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        margin-top: 10px;
+    }
+
+    .copy-feedback {
+        font-size: 0.8em;
+    }
+
+    .card {
+        padding: 15px;
+        max-width: 95%;
+    }
+
+    .amount-input, .select-token {
+        max-width: 100%;
+    }
+
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .button-group .button {
+        width: 100%;
+        max-width: 250px;
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    .connect-wallet-message {
+        font-size: 1em;
+    }
+
+    .countdown {
+        padding: 8px 16px;
+        font-size: 1em;
+    }
+
+    #tsparticles {
+        display: show;
+    }
+}
+
+@media (max-width: 480px) {
+    #tsparticles {
+        display: show;
+    }
+}
+
+@media (max-width: 600px) {
+    .amount-input, .select-token {
+        max-width: 100%;
+    }
+}
+
+.staking-timer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.site-title span {
+    display: block;
+}
