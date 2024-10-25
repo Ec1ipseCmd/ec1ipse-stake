@@ -1,4 +1,4 @@
-import '../styles/styles.css'; // Import your custom styles.css
+import "../styles.css";
 import { WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import '@solana/wallet-adapter-react-ui/styles.css'; // Import wallet adapter styles
