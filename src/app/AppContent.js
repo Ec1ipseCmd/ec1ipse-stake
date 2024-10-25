@@ -744,7 +744,9 @@ function AppContent() {
                 className="logo"
               />
             </div>
-            <h1 className="site-title">Ec1ipse Staking</h1>
+            <h1 className="site-title">
+  <span>Ec1ipse</span> <span>Staking</span>
+</h1>
           </div>
           <WalletMultiButton className="wallet-button" />
         </header>

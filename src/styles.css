@@ -79,6 +79,10 @@ body {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
+    white-space: nowrap; /* Prevent line breaks */
+    max-width: 300px; /* Set a max-width */
+    overflow: show; /* Handle any overflow */
+    text-overflow: ellipsis; /* Add ellipsis if text overflows */
 }
 
 .wallet-button:hover {
@@ -500,6 +504,7 @@ body::after {
     .wallet-button {
         padding: 8px 16px;
         font-size: 0.9rem;
+        max-width: 250px;
     }
 
     .wallet-status {
