@@ -93,7 +93,7 @@ const WalletBalances = memo(({ publicKey, connection }) => {
         fetchBalances();
     }, [fetchBalances]);
 
-    useInterval(fetchBalances, publicKey && connection ? 1000 : null);
+    useInterval(fetchBalances, publicKey && connection ? 3000 : null);
 
     return (
         <div className="balances">
@@ -117,6 +117,48 @@ const WalletBalances = memo(({ publicKey, connection }) => {
 });
 
 WalletBalances.displayName = "WalletBalances";
+
+const StakingReward = memo(({ publicKey }) => {
+    const [stakeReward, setStakeReward] = useState('0.00');
+
+    const fetchStakeReward = useCallback(async () => {
+        if (!publicKey) return;
+
+        try {
+            const url = `https://ec1ipse.me/v2/miner/boost/stake-accounts?pubkey=${publicKey.toBase58()}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            
+            // Sum up all rewards_balance values
+            const totalRewards = data.reduce((acc, item) => {
+                return acc + (parseFloat(item.rewards_balance) || 0);
+            }, 0);
+
+            setStakeReward(totalRewards.toFixed(2)); // Format to 2 decimal places
+        } catch (error) {
+            console.error('Error fetching stake reward balance:', error);
+            setStakeReward('0.00');
+        }
+    }, [publicKey]);
+
+    useEffect(() => {
+        fetchStakeReward();
+    }, [fetchStakeReward]);
+
+    useInterval(fetchStakeReward, publicKey ? 3000 : null);
+
+    return (
+        <div className="staking-reward">
+            <h3 className="large-heading-important">Staking Reward</h3>
+            <p className="stake-reward-balance">{stakeReward}</p>
+        </div>
+    );
+});
+
+StakingReward.displayName = "StakingReward";
+
 
 const StakedBalances = memo(({ publicKey, connection }) => {
     const [stakedBalances, setStakedBalances] = useState({});
@@ -145,26 +187,28 @@ const StakedBalances = memo(({ publicKey, connection }) => {
                     const parsed = parseFloat(text);
                     if (isNaN(parsed)) {
                         console.warn(`Invalid response for ${tokenName}: ${text}`);
-                        return { name: tokenName, balance: '0.00' };
+                        return { name: tokenName, balance: null };  // Use `null` to indicate a failed fetch
                     }
                     return { name: tokenName, balance: parsed };
                 } catch (error) {
                     console.error(`Error fetching staked balance for ${tokenName}:`, error);
-                    return { name: tokenName, balance: '0.00' };
+                    return { name: tokenName, balance: null };
                 }
             });
 
             const results = await Promise.all(fetchPromises);
 
-            const successfulBalances = results.reduce((acc, curr) => {
-                acc[curr.name] = curr.balance;
-                return acc;
-            }, {});
-
             setStakedBalances((prevStakedBalances) => {
-                const newStakedBalances = { ...prevStakedBalances, ...successfulBalances };
-                const current = JSON.stringify(newStakedBalances);
+                const newStakedBalances = { ...prevStakedBalances };
+
+                results.forEach(({ name, balance }) => {
+                    if (balance !== null) {
+                        newStakedBalances[name] = balance;
+                    }
+                });
+
                 const prev = JSON.stringify(prevStakedBalances);
+                const current = JSON.stringify(newStakedBalances);
                 if (current !== prev) {
                     if (isFirstLoad) setIsFirstLoad(false);
                     return newStakedBalances;
@@ -180,12 +224,12 @@ const StakedBalances = memo(({ publicKey, connection }) => {
         fetchStakedBalances();
     }, [fetchStakedBalances]);
 
-    useInterval(fetchStakedBalances, publicKey && connection ? 1000 : null);
+    useInterval(fetchStakedBalances, publicKey && connection ? 3000 : null);
 
     return (
         <div className="staked-balances">
             <h3 className="large-heading">Staked Balance:</h3>
-            <p>(Yield earning):</p>
+            <p style={{ fontSize: '0.85em', color: '#888' }}>(Yield earning):</p>
             {isFirstLoad && Object.keys(stakedBalances).length === 0 ? (
                 <p className="loading-text">Loading staked balances...</p>
             ) : (
@@ -193,7 +237,7 @@ const StakedBalances = memo(({ publicKey, connection }) => {
                     {Object.keys(mintAddresses).map((tokenName) => (
                         <li key={tokenName}>
                             <span className="token-name">{tokenName}:</span>
-                            <span className="token-balance">{stakedBalances[tokenName] || '0.00'}</span>
+                            <span className="token-balance">{stakedBalances[tokenName] !== undefined ? stakedBalances[tokenName] : '0.00'}</span>
                         </li>
                     ))}
                 </ul>
@@ -237,6 +281,8 @@ function WalletStatus({ connection }) {
                         </button>
                         {copied && <span className="copy-feedback">Copied!</span>}
                     </div>
+                    <br/>
+                    <StakingReward publicKey={publicKey} />
                     <WalletBalances publicKey={publicKey} connection={connection} />
                     <hr className="separator" />
                     <StakedBalances publicKey={publicKey} connection={connection} />

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --font-roboto: 'Roboto', sans-serif;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -17,8 +18,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-      Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  background-color: #000;
-  color: #fff;
+  font-family: var(--font-roboto);
+  background-color: var(--background);
+  color: var(--foreground);
 }

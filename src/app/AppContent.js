@@ -211,7 +211,7 @@ function AppContent() {
       alert("Unstake transaction sent successfully!");
     } catch (error) {
       console.error("Error unstaking boost:", error);
-      alert("Error unstaking boost. See console for details.");
+      alert("Error confirming unstaking boost. Please review totals for confirmation.");
     } finally {
       setIsProcessing(false);
     }

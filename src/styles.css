@@ -1,16 +1,19 @@
-body {
+:root {
+    --font-roboto: 'Roboto', sans-serif;
+  }
+  
+  body {
     margin: 0;
     padding: 0;
     width: 100%;
     min-height: 100vh;
-    font-family: 'Arial, sans-serif';
+    font-family: var(--font-roboto); /* Use the font variable here */
     background-color: #121212;
     color: #e0e0e0;
     box-sizing: border-box;
-    position: relative;
     display: flex;
     justify-content: center;
-}
+  }
 
 #tsparticles {
     position: fixed;
@@ -593,4 +596,57 @@ body::after {
 
 .site-title span {
     display: block;
+}
+/* Staking Reward Component Styling */
+.staking-reward {
+    background-color: rgba(224, 224, 224, 0.05);
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    margin-bottom: 20px;
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+}
+
+.staking-reward h3.large-heading-important {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #e0e0e0;
+    margin: 0;
+}
+
+.stake-reward-balance {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #e0e0e0;
+    margin-top: 10px;
+}
+
+.staking-reward:hover {
+    background-color: rgba(224, 224, 224, 0.1);
+}
+
+@media (max-width: 768px) {
+    .staking-reward {
+        padding: 15px;
+    }
+    
+    .stake-reward-balance {
+        font-size: 1.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .staking-reward {
+        padding: 10px;
+    }
+
+    .staking-reward h3.large-heading-important {
+        font-size: 1.3em;
+    }
+
+    .stake-reward-balance {
+        font-size: 1.5em;
+    }
 }
