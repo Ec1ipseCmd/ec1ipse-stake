@@ -46,7 +46,7 @@ const WalletBalances = memo(({ publicKey, connection }) => {
                     if (token.name === 'SOL') {
                         const balanceLamports = await connection.getBalance(publicKey);
                         const balanceSOL = balanceLamports / 1e9;
-                        return { name: token.name, balance: balanceSOL.toFixed(2) }; // 2 decimal places
+                        return { name: token.name, balance: balanceSOL.toFixed(2) };
                     } else {
                         const mintPublicKey = new PublicKey(token.mintAddress);
                         const tokenAccount = getAssociatedTokenAddressSync(
@@ -57,11 +57,11 @@ const WalletBalances = memo(({ publicKey, connection }) => {
                         );
 
                         const accountInfo = await connection.getAccountInfo(tokenAccount);
-                        if (!accountInfo) return { name: token.name, balance: '0.00' }; // Default to '0.00'
+                        if (!accountInfo) return { name: token.name, balance: '0.00' };
 
                         const tokenBalance = await connection.getTokenAccountBalance(tokenAccount);
                         const balance = Number(tokenBalance.value.uiAmount) || 0;
-                        return { name: token.name, balance: balance.toFixed(2) }; // 2 decimal places
+                        return { name: token.name, balance: balance.toFixed(2) };
                     }
                 });
 
@@ -106,7 +106,7 @@ const WalletBalances = memo(({ publicKey, connection }) => {
                         <li key={token.name}>
                             <span className="token-name">{token.name}:</span>
                             <span className="token-balance">
-                                {balances[token.name] !== undefined ? balances[token.name] : '0.00'} {/* Changed 'N/A' to '0.00' */}
+                                {balances[token.name] !== undefined ? balances[token.name] : '0.00'}
                             </span>
                         </li>
                     ))}
@@ -116,11 +116,12 @@ const WalletBalances = memo(({ publicKey, connection }) => {
     );
 });
 
+WalletBalances.displayName = "WalletBalances";
+
 const StakedBalances = memo(({ publicKey, connection }) => {
     const [stakedBalances, setStakedBalances] = useState({});
     const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-    // Define mintAddresses based on TOKEN_LIST
     const mintAddresses = TOKEN_LIST
         .filter(token => token.mintAddress)
         .reduce((acc, token) => {
@@ -144,12 +145,12 @@ const StakedBalances = memo(({ publicKey, connection }) => {
                     const parsed = parseFloat(text);
                     if (isNaN(parsed)) {
                         console.warn(`Invalid response for ${tokenName}: ${text}`);
-                        return { name: tokenName, balance: '0.00' }; // Default to '0.00'
+                        return { name: tokenName, balance: '0.00' };
                     }
-                    return { name: tokenName, balance: parsed.toFixed(2) }; // 2 decimal places
+                    return { name: tokenName, balance: parsed.toFixed(2) };
                 } catch (error) {
                     console.error(`Error fetching staked balance for ${tokenName}:`, error);
-                    return { name: tokenName, balance: '0.00' }; // Default to '0.00'
+                    return { name: tokenName, balance: '0.00' };
                 }
             });
 
@@ -192,7 +193,7 @@ const StakedBalances = memo(({ publicKey, connection }) => {
                     {Object.keys(mintAddresses).map((tokenName) => (
                         <li key={tokenName}>
                             <span className="token-name">{tokenName}:</span>
-                            <span className="token-balance">{stakedBalances[tokenName] || '0.00'}</span> {/* Defaults to '0.00' */}
+                            <span className="token-balance">{stakedBalances[tokenName] || '0.00'}</span>
                         </li>
                     ))}
                 </ul>
@@ -200,6 +201,8 @@ const StakedBalances = memo(({ publicKey, connection }) => {
         </div>
     );
 });
+
+StakedBalances.displayName = "StakedBalances";
 
 function WalletStatus({ connection }) {
     const { publicKey } = useWallet();
@@ -244,5 +247,7 @@ function WalletStatus({ connection }) {
         </div>
     );
 }
+
+WalletStatus.displayName = "WalletStatus";
 
 export default memo(WalletStatus);
