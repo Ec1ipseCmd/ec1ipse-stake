@@ -1,5 +1,5 @@
 "use client"; 
-import "../../styles.css";
+import "./styles.css";
 import React, { useEffect } from 'react';
 
 function StakingTimer({ 

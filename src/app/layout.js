@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 import './globals.css';
-import './styles.css';
+import '../styles.css';
 import '@solana/wallet-adapter-react-ui/styles.css';
 export const metadata = {
   title: 'Ec1ipse Stake',

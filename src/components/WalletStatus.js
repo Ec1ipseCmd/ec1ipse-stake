@@ -1,6 +1,6 @@
 "use client";
 
-import "../../styles.css";
+import "./styles.css";
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
@@ -46,7 +46,7 @@ const WalletBalances = memo(({ publicKey, connection }) => {
                     if (token.name === 'SOL') {
                         const balanceLamports = await connection.getBalance(publicKey);
                         const balanceSOL = balanceLamports / 1e9;
-                        return { name: token.name, balance: balanceSOL.toFixed(2) };
+                        return { name: token.name, balance: balanceSOL };
                     } else {
                         const mintPublicKey = new PublicKey(token.mintAddress);
                         const tokenAccount = getAssociatedTokenAddressSync(
@@ -61,7 +61,7 @@ const WalletBalances = memo(({ publicKey, connection }) => {
 
                         const tokenBalance = await connection.getTokenAccountBalance(tokenAccount);
                         const balance = Number(tokenBalance.value.uiAmount) || 0;
-                        return { name: token.name, balance: balance.toFixed(2) };
+                        return { name: token.name, balance: balance };
                     }
                 });
 
@@ -147,7 +147,7 @@ const StakedBalances = memo(({ publicKey, connection }) => {
                         console.warn(`Invalid response for ${tokenName}: ${text}`);
                         return { name: tokenName, balance: '0.00' };
                     }
-                    return { name: tokenName, balance: parsed.toFixed(2) };
+                    return { name: tokenName, balance: parsed };
                 } catch (error) {
                     console.error(`Error fetching staked balance for ${tokenName}:`, error);
                     return { name: tokenName, balance: '0.00' };

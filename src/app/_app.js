@@ -1,4 +1,3 @@
-// App.js
 "use client";
 
 import React, { useMemo } from 'react';
@@ -6,18 +5,18 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import AppContent from './AppContent';
-import '../styles.css';
 
-function App() {
+import './styles.css';
+
+function MyApp({ Component, pageProps }) {
     const wallets = useMemo(
         () => [
             new PhantomWalletAdapter(),
-            new SolflareWalletAdapter()
+            new SolflareWalletAdapter(),
         ],
         []
     );
 
-    // Use the environment variable for the network
     const network = process.env.NEXT_PUBLIC_RPC_URL;
 
     return (
@@ -31,4 +30,4 @@ function App() {
     );
 }
 
-export default App;
+export default MyApp;
