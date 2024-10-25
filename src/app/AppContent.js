@@ -82,53 +82,56 @@ function AppContent() {
     fetchDecimals();
   }, [mintAddress, connection]);
 
-  const getDelegatedBoostAddress = useCallback(async (staker, mint) => {
-    const programId = new PublicKey(
-      "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
-    );
-  
-    const managed_proof_address = PublicKey.findProgramAddressSync(
-      [Buffer.from("managed-proof-account"), miner.toBuffer()],
-      programId
-    )[0];
-  
-    const delegated_boost_address = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("v2-delegated-boost"),
-        staker.toBuffer(),
-        mint.toBuffer(),
-        managed_proof_address.toBuffer(),
-      ],
-      programId
-    )[0];
-  
-    return delegated_boost_address;
-  }, [miner]);
-  
+  const getDelegatedBoostAddress = useCallback(
+    async (staker, mint) => {
+      const programId = new PublicKey(
+        "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
+      );
+
+      const managed_proof_address = PublicKey.findProgramAddressSync(
+        [Buffer.from("managed-proof-account"), miner.toBuffer()],
+        programId
+      )[0];
+
+      const delegated_boost_address = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("v2-delegated-boost"),
+          staker.toBuffer(),
+          mint.toBuffer(),
+          managed_proof_address.toBuffer(),
+        ],
+        programId
+      )[0];
+
+      return delegated_boost_address;
+    },
+    [miner]
+  );
+
   const handleStakeBoost = useCallback(async () => {
     if (!publicKey) {
       alert("Please connect your wallet");
       return;
     }
-  
+
     const stakeAmountFloat = parseFloat(amount);
     if (isNaN(stakeAmountFloat) || stakeAmountFloat <= 0) {
       alert("Please enter a valid amount to stake.");
       return;
     }
-  
+
     try {
       setIsProcessing(true);
       const transaction = new Transaction();
       const staker = publicKey;
       const mint = new PublicKey(mintAddress);
       const stakeAmount = BigInt(Math.round(stakeAmountFloat * 10 ** decimals));
-  
+
       const delegated_boost_address = await getDelegatedBoostAddress(
         staker,
         mint
       );
-  
+
       const accountInfo = await connection.getAccountInfo(
         delegated_boost_address
       );
@@ -141,7 +144,7 @@ function AppContent() {
         );
         transaction.add(initInstruction);
       }
-  
+
       const stakeInstruction = await createStakeBoostInstruction(
         staker,
         miner,
@@ -149,12 +152,14 @@ function AppContent() {
         stakeAmount
       );
       transaction.add(stakeInstruction);
-  
+
       const signature = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(signature, "confirmed");
-  
+
       if (!accountInfo) {
-        alert("Boost account initialized and stake transaction sent successfully!");
+        alert(
+          "Boost account initialized and stake transaction sent successfully!"
+        );
       } else {
         alert("Stake transaction sent successfully!");
       }
@@ -172,9 +177,8 @@ function AppContent() {
     decimals,
     miner,
     connection,
-    getDelegatedBoostAddress // Now the wrapped function dependency
+    getDelegatedBoostAddress, // Now the wrapped function dependency
   ]);
-  
 
   const handleUnstakeBoost = useCallback(async () => {
     if (!publicKey) {
@@ -211,7 +215,9 @@ function AppContent() {
       alert("Unstake transaction sent successfully!");
     } catch (error) {
       console.error("Error unstaking boost:", error);
-      alert("Error confirming unstaking boost. Please review totals for confirmation.");
+      alert(
+        "Error confirming unstaking boost. Please review totals for confirmation."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -726,6 +732,20 @@ function AppContent() {
     <>
       <div id="tsparticles"></div>
 
+      {/* Google Analytics Script */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-Y6S4ZYT334"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y6S4ZYT334');
+      `}
+      </Script>
+
       <Script
         src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"
         strategy="afterInteractive"
@@ -745,8 +765,8 @@ function AppContent() {
               />
             </div>
             <h1 className="site-title">
-  <span>Ec1ipse</span> <span>Staking</span>
-</h1>
+              <span>Ec1ipse</span> <span>Staking</span>
+            </h1>
           </div>
           <WalletMultiButton className="wallet-button" />
         </header>
