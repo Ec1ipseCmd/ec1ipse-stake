@@ -16,9 +16,9 @@ import StakingTimer from "../components/StakingTimer";
 import dynamic from "next/dynamic";
 
 import { Buffer } from "buffer";
-import { NightlyWalletAdapter } from "@solana/wallet-adapter-wallets";
 import Script from "next/script";
 import Image from "next/image";
+import { TOKEN_LIST } from "../components/tokens";
 
 const WalletMultiButton = dynamic(
   () =>
@@ -27,19 +27,6 @@ const WalletMultiButton = dynamic(
     ),
   { ssr: false }
 );
-
-const TOKEN_LIST = [
-  { name: "SOL", mintAddress: null },
-  { name: "ORE", mintAddress: "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp" },
-  {
-    name: "ORE-SOL LP",
-    mintAddress: "DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN",
-  },
-  {
-    name: "ORE-ISC LP",
-    mintAddress: "meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb",
-  },
-];
 
 const getTokenProgramId = () =>
   new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
@@ -59,6 +46,7 @@ function AppContent() {
     () => new Connection(process.env.NEXT_PUBLIC_RPC_URL),
     []
   );
+
   const miner = useMemo(
     () => new PublicKey("mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH"),
     []
@@ -81,6 +69,14 @@ function AppContent() {
     };
     fetchDecimals();
   }, [mintAddress, connection]);
+
+  const handleBalanceClick = useCallback((tokenName, balance) => {
+    const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);
+    if (selectedToken && selectedToken.mintAddress) {
+      setAmount(balance.toString());
+      setMintAddress(selectedToken.mintAddress);
+    }
+  }, []);
 
   const getDelegatedBoostAddress = useCallback(
     async (staker, mint) => {
@@ -177,7 +173,7 @@ function AppContent() {
     decimals,
     miner,
     connection,
-    getDelegatedBoostAddress, // Now the wrapped function dependency
+    getDelegatedBoostAddress,
   ]);
 
   const handleUnstakeBoost = useCallback(async () => {
@@ -485,7 +481,6 @@ function AppContent() {
 
       return instruction_v1;
     } catch (error) {
-      console.error("Error creating unstake boost instruction v1:", error);
       throw error;
     }
   };
@@ -576,7 +571,6 @@ function AppContent() {
 
       return instruction;
     } catch (error) {
-      console.error("Error creating unstake boost instruction:", error);
       throw error;
     }
   };
@@ -640,14 +634,13 @@ function AppContent() {
 
       return instruction;
     } catch (error) {
-      console.error("Error creating init delegate boost instruction:", error);
       throw error;
     }
   };
 
-  const formatBalance = (balance) => {
-    if (balance === null || balance === undefined) return "0.0000";
-    return balance.toFixed(4);
+  const formatBalanceApp = (balance) => {
+    const num = Number(balance);
+    return !isNaN(num) ? num.toFixed(2) : "0.00";
   };
 
   const particlesConfig = {
@@ -732,18 +725,17 @@ function AppContent() {
     <>
       <div id="tsparticles"></div>
 
-      {/* Google Analytics Script */}
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-Y6S4ZYT334"
         strategy="afterInteractive"
       />
       <Script id="google-analytics" strategy="afterInteractive">
         {`
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-Y6S4ZYT334');
-      `}
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-Y6S4ZYT334');
+        `}
       </Script>
 
       <Script
@@ -772,7 +764,10 @@ function AppContent() {
         </header>
 
         <div className="balances-section">
-          <WalletStatus connection={connection} />
+          <WalletStatus
+            connection={connection}
+            onBalanceClick={handleBalanceClick}
+          />
 
           <hr className="separator" />
         </div>
@@ -801,8 +796,8 @@ function AppContent() {
 
           <div className="input-group">
             <select
-              value={mintAddress}
-              onChange={(e) => setMintAddress(e.target.value)}
+              value={mintAddress || ""}
+              onChange={(e) => setMintAddress(e.target.value || null)}
               className="select-token"
             >
               {TOKEN_LIST.filter((token) => token.mintAddress).map((token) => (

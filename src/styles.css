@@ -82,10 +82,10 @@
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
-    white-space: nowrap; /* Prevent line breaks */
-    max-width: 300px; /* Set a max-width */
-    overflow: show; /* Handle any overflow */
-    text-overflow: ellipsis; /* Add ellipsis if text overflows */
+    white-space: nowrap;
+    max-width: 300px;
+    overflow: show;
+    text-overflow: ellipsis;
 }
 
 .wallet-button:hover {
@@ -597,7 +597,7 @@ body::after {
 .site-title span {
     display: block;
 }
-/* Staking Reward Component Styling */
+
 .staking-reward {
     background-color: rgba(224, 224, 224, 0.05);
     padding: 12px;
@@ -649,4 +649,31 @@ body::after {
     .stake-reward-balance {
         font-size: 1.5em;
     }
+}
+
+.balance-item {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .balance-item:hover {
+    background-color: rgba(224, 224, 224, 0.1);
+  }
+
+.balance-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .balance-item.disabled:hover {
+    background-color: transparent;
+  }
+
+.balance-item:active {
+    background-color: rgba(224, 224, 224, 0.2);
+}
+
+.balance-item:focus {
+    outline: none;
+    background-color: rgba(224, 224, 224, 0.15);
 }
