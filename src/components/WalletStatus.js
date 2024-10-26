@@ -133,10 +133,10 @@ const StakingReward = memo(({ publicKey }) => {
             
             // Sum up all rewards_balance values
             const totalRewards = data.reduce((acc, item) => {
-                return acc + (parseFloat(item.rewards_balance) || 0);
+                return acc + (parseFloat(item.rewards_balance) / 100000000000 || 0);
             }, 0);
 
-            setStakeReward(totalRewards.toFixed(2)); // Format to 2 decimal places
+            setStakeReward(totalRewards); // Format to 2 decimal places
         } catch (error) {
             console.error('Error fetching stake reward balance:', error);
             setStakeReward('0.00');
