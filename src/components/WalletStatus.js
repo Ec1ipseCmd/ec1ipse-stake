@@ -136,7 +136,7 @@ const StakingReward = memo(({ publicKey }) => {
                 return acc + (parseFloat(item.rewards_balance) / 100000000000 || 0);
             }, 0);
 
-            setStakeReward(totalRewards); // Format to 2 decimal places
+            setStakeReward(totalRewards.toFixed(11)); // Format to 11 decimal places
         } catch (error) {
             console.error('Error fetching stake reward balance:', error);
             setStakeReward('0.00');
