@@ -92,7 +92,7 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick }) => {
     fetchBalances();
   }, [fetchBalances]);
 
-  useInterval(fetchBalances, publicKey && connection ? 3000 : null);
+  useInterval(fetchBalances, publicKey && connection ? 5000 : null);
 
   const handleClick = (tokenName) => {
     const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);

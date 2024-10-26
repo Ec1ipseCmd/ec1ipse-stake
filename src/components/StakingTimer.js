@@ -39,7 +39,7 @@ function StakingTimer({
 
         updateStakeAvailability();
 
-        const intervalId = setInterval(updateStakeAvailability, 1000);
+        const intervalId = setInterval(updateStakeAvailability, 5000);
 
         return () => clearInterval(intervalId);
     }, [setIsStakeActive, setCountdown]);
