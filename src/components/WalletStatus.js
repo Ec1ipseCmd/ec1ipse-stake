@@ -248,11 +248,15 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
       console.error("Error fetching stake reward balance:", error);
       setStakeReward("0.00");
     }
-  }, [publicKey, refreshCount]); // Added refreshCount here
+  }, [publicKey, refreshCount]);
 
   useEffect(() => {
     fetchStakeReward();
-  }, [fetchStakeReward]); // Now, fetchStakeReward changes when refreshCount changes
+
+    const intervalId = setInterval(fetchStakeReward, 75000);
+
+    return () => clearInterval(intervalId);
+  }, [fetchStakeReward]);
 
   return (
     <div className="staking-reward">
