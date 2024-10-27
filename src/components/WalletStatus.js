@@ -7,6 +7,8 @@ import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { TOKEN_LIST } from "./tokens";
 
+import { toast } from "react-toastify";
+
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
 const formatPubkey = (pubkey) => {
@@ -16,25 +18,10 @@ const formatPubkey = (pubkey) => {
 
 const formatBalance = (balance) => {
   const num = Number(balance);
-  return (!isNaN(num) && num !== 0) ? num.toFixed(11) : "0.00";
+  return !isNaN(num) && num !== 0 ? num.toFixed(11) : "0.00";
 };
 
-const useInterval = (callback, delay) => {
-  const savedCallback = useRef();
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  useEffect(() => {
-    if (delay !== null) {
-      const id = setInterval(() => savedCallback.current(), delay);
-      return () => clearInterval(id);
-    }
-  }, [delay]);
-};
-
-const WalletBalances = memo(({ publicKey, connection, onBalanceClick }) => {
+const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCount }) => {
   const [balances, setBalances] = useState({});
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
@@ -81,18 +68,17 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick }) => {
         });
       } catch (error) {
         console.error("Error fetching balances:", error);
+        toast.error("Error fetching balances");
         setBalances({});
       }
     } else {
       setBalances({});
     }
-  }, [publicKey, connection, isFirstLoad]);
+  }, [publicKey, connection, isFirstLoad, refreshCount]); // Added refreshCount here
 
   useEffect(() => {
     fetchBalances();
-  }, [fetchBalances]);
-
-  useInterval(fetchBalances, publicKey && connection ? 3000 : null);
+  }, [fetchBalances]); // Now, fetchBalances changes when refreshCount changes
 
   const handleClick = (tokenName) => {
     const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);
@@ -134,7 +120,7 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick }) => {
 
 WalletBalances.displayName = "WalletBalances";
 
-const StakedBalances = memo(({ publicKey, connection, onBalanceClick }) => {
+const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCount }) => {
   const [stakedBalances, setStakedBalances] = useState({});
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
@@ -174,16 +160,14 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick }) => {
       );
 
       const results = await Promise.all(fetchPromises);
+      const newStakedBalances = results.reduce((acc, curr) => {
+        if (curr.balance !== null) {
+          acc[curr.name] = curr.balance;
+        }
+        return acc;
+      }, {});
 
       setStakedBalances((prevStakedBalances) => {
-        const newStakedBalances = { ...prevStakedBalances };
-
-        results.forEach(({ name, balance }) => {
-          if (balance !== null) {
-            newStakedBalances[name] = balance;
-          }
-        });
-
         const prev = JSON.stringify(prevStakedBalances);
         const current = JSON.stringify(newStakedBalances);
         if (current !== prev) {
@@ -195,13 +179,11 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick }) => {
     } catch (error) {
       console.error("Error fetching staked balances:", error);
     }
-  }, [publicKey, mintAddresses, isFirstLoad, connection]);
+  }, [publicKey, mintAddresses, isFirstLoad, connection, refreshCount]); // Added refreshCount here
 
   useEffect(() => {
     fetchStakedBalances();
-  }, [fetchStakedBalances]);
-
-  useInterval(fetchStakedBalances, publicKey && connection ? 80000 : null);
+  }, [fetchStakedBalances]); // Now, fetchStakedBalances changes when refreshCount changes
 
   const handleClick = (tokenName) => {
     const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);
@@ -244,7 +226,7 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick }) => {
 
 StakedBalances.displayName = "StakedBalances";
 
-const StakingReward = memo(({ publicKey }) => {
+const StakingReward = memo(({ publicKey, refreshCount }) => {
   const [stakeReward, setStakeReward] = useState("0.00");
 
   const fetchStakeReward = useCallback(async () => {
@@ -266,13 +248,11 @@ const StakingReward = memo(({ publicKey }) => {
       console.error("Error fetching stake reward balance:", error);
       setStakeReward("0.00");
     }
-  }, [publicKey]);
+  }, [publicKey, refreshCount]); // Added refreshCount here
 
   useEffect(() => {
     fetchStakeReward();
-  }, [fetchStakeReward]);
-
-  useInterval(fetchStakeReward, publicKey ? 80000 : null);
+  }, [fetchStakeReward]); // Now, fetchStakeReward changes when refreshCount changes
 
   return (
     <div className="staking-reward">
@@ -287,6 +267,8 @@ StakingReward.displayName = "StakingReward";
 const WalletStatus = memo(({ connection, onBalanceClick }) => {
   const { publicKey } = useWallet();
   const [copied, setCopied] = useState(false);
+  const [refreshCount, setRefreshCount] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleCopy = useCallback(() => {
     if (publicKey) {
@@ -301,6 +283,14 @@ const WalletStatus = memo(({ connection, onBalanceClick }) => {
         });
     }
   }, [publicKey]);
+
+  const handleRefresh = () => {
+    if (!publicKey) return;
+    setIsRefreshing(true);
+    setRefreshCount((prev) => prev + 1);
+    // Simulate async operation if needed
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
 
   return (
     <div className="wallet-status">
@@ -317,19 +307,30 @@ const WalletStatus = memo(({ connection, onBalanceClick }) => {
               📜
             </button>
             {copied && <span className="copy-feedback">Copied!</span>}
+            <button
+              className="refresh-button"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              aria-label="Refresh balances"
+              style={{ marginLeft: "10px" }}
+            >
+              {isRefreshing ? "Refreshing..." : "Refresh 🔄"}
+            </button>
           </div>
           <br />
-          <StakingReward publicKey={publicKey} />
+          <StakingReward publicKey={publicKey} refreshCount={refreshCount} />
           <WalletBalances
             publicKey={publicKey}
             connection={connection}
             onBalanceClick={onBalanceClick}
+            refreshCount={refreshCount} // Passed refreshCount
           />
           <hr className="separator" />
           <StakedBalances
             publicKey={publicKey}
             connection={connection}
             onBalanceClick={onBalanceClick}
+            refreshCount={refreshCount} // Passed refreshCount
           />
         </>
       ) : (

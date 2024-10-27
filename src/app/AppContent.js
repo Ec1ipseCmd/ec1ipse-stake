@@ -20,6 +20,9 @@ import Script from "next/script";
 import Image from "next/image";
 import { TOKEN_LIST } from "../components/tokens";
 
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const WalletMultiButton = dynamic(
   () =>
     import("@solana/wallet-adapter-react-ui").then(
@@ -106,13 +109,13 @@ function AppContent() {
 
   const handleStakeBoost = useCallback(async () => {
     if (!publicKey) {
-      alert("Please connect your wallet");
+      toast.error("Please connect your wallet");
       return;
     }
 
     const stakeAmountFloat = parseFloat(amount);
     if (isNaN(stakeAmountFloat) || stakeAmountFloat <= 0) {
-      alert("Please enter a valid amount to stake.");
+      toast.error("Please enter a valid amount to stake.");
       return;
     }
 
@@ -152,16 +155,10 @@ function AppContent() {
       const signature = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(signature, "confirmed");
 
-      if (!accountInfo) {
-        alert(
-          "Boost account initialized and stake transaction sent successfully!"
-        );
-      } else {
-        alert("Stake transaction sent successfully!");
-      }
+      toast.success("Boost account initialized and stake transaction sent successfully!");
     } catch (error) {
       console.error("Error staking boost:", error);
-      alert(`Error staking boost: ${error.message || error}`);
+      toast.error(`Error staking boost: ${error.message || error}`);
     } finally {
       setIsProcessing(false);
     }
@@ -178,13 +175,13 @@ function AppContent() {
 
   const handleUnstakeBoost = useCallback(async () => {
     if (!publicKey) {
-      alert("Please connect your wallet");
+      toast.error("Please connect your wallet");
       return;
     }
 
     const unstakeAmountFloat = parseFloat(amount);
     if (isNaN(unstakeAmountFloat) || unstakeAmountFloat <= 0) {
-      alert("Please enter a valid amount to unstake.");
+      toast.error("Please enter a valid amount to unstake.");
       return;
     }
 
@@ -208,12 +205,10 @@ function AppContent() {
       const signature = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(signature, "confirmed");
 
-      alert("Unstake transaction sent successfully!");
+      toast.success("Unstake transaction sent successfully!");
     } catch (error) {
       console.error("Error unstaking boost:", error);
-      alert(
-        "Error confirming unstaking boost. Please review totals for confirmation."
-      );
+      toast.error("Error confirming unstaking boost. Please review totals for confirmation.");
     } finally {
       setIsProcessing(false);
     }
@@ -229,7 +224,7 @@ function AppContent() {
 
   const handleBoostTransaction = useCallback(async () => {
     if (!publicKey) {
-      alert("Please connect your wallet");
+      toast.error("Please connect your wallet");
       return;
     }
 
@@ -318,17 +313,13 @@ function AppContent() {
         await connection.confirmTransaction(signature, "confirmed");
         console.log("Transaction Sent and Confirmed");
 
-        if (boostAmountFloat > 0) {
-          alert("Boost transaction completed successfully!");
-        } else {
-          alert("No boost transaction performed as the staked amount is zero.");
-        }
+        toast.success("Boost transaction completed successfully!");
       } else {
-        alert("No valid boost transaction to perform.");
+        toast.info("No valid boost transaction to perform.");
       }
     } catch (error) {
       console.error("Error performing boost transaction:", error);
-      alert(`Error performing boost transaction: ${error.message || error}`);
+      toast.error(`Error performing boost transaction: ${error.message || error}`);
     } finally {
       setIsProcessing(false);
     }
@@ -834,7 +825,18 @@ function AppContent() {
           )}
         </div>
       </div>
-    </>
+
+      <ToastContainer
+  position="bottom-left"
+  autoClose={3000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  rtl={false}
+  pauseOnFocusLoss
+  draggable={false}
+  pauseOnHover
+  theme="color" // Ensures toastify adapts to a dark theme
+/>    </>
   );
 }
 
