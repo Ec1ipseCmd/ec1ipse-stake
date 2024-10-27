@@ -273,6 +273,15 @@
     text-decoration: line-through;
 }
 
+.claim-reward-button:hover {
+    background-color: #1c86ee;
+    cursor: pointer;
+}
+.claim-reward-button {
+    background-color: #1874cd;
+    cursor: pointer;
+}
+
 .unstake-button {
     background-color: #b71c1c;
 }

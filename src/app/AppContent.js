@@ -22,6 +22,7 @@ import { TOKEN_LIST } from "../components/tokens";
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { fallbackModeToStaticPathsResult } from "next/dist/lib/fallback";
 
 const WalletMultiButton = dynamic(
   () =>
@@ -221,6 +222,51 @@ function AppContent() {
     miner,
     connection,
   ]);
+
+  const handleStakeClaim = useCallback(async () => {
+    if (!publicKey) {
+        toast.dismiss();
+        toast.error("Please connect your wallet");
+        return;
+    }
+
+    try {
+        setIsProcessing(true);
+        const url = `https://ec1ipse.me/v2/miner/boost/stake-accounts?pubkey=${publicKey.toBase58()}`;
+        let response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const datas = await response.json();
+        console.log("datas", datas);
+
+        let errorShown = false;
+        
+        await Promise.all(datas.map(async (data) => {
+            try {
+                response = await fetch(`https://ec1ipse.me/v3/claim-stake-rewards?pubkey=${publicKey.toBase58()}&mint=${data.mint_pubkey}&amount=${data.rewards_balance}`, {
+                    method: "POST",
+                });
+                if (!response.ok) {
+                    if (!errorShown) {
+                        errorShown = true;
+                        toast.error("Error queueing claim request:", await response.text());
+                    }
+                } else {
+                    toast.success(`Claim of ${(data.rewards_balance * 10 ** -11).toFixed(11)} ORE for rewards added to queue.`);
+                }
+            } catch (err) {
+                console.error("Error processing claim for:", data.mint_pubkey, err);
+            }
+        }));
+        
+    } catch (error) {
+        toast.dismiss();
+        console.error("Error queueing claim request:", error);
+        toast.error(`Claim not added to queue. Please Retry.: ${error.message || error}`);
+    } finally {
+        setIsProcessing(false);
+    }
+});
+
 
   const handleBoostTransaction = useCallback(async () => {
     if (!publicKey) {
@@ -817,6 +863,14 @@ function AppContent() {
               >
                 {isProcessing ? "Processing..." : "Unstake Boost"}
               </button>
+              <button
+                onClick={handleStakeClaim}
+                className="button claim-reward-button"
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Processing..." : "Claim Rewards"}
+              </button>
+              
             </div>
           ) : (
             <p className="connect-wallet-message">
