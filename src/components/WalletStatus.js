@@ -1,12 +1,11 @@
 "use client";
 
 import "../styles.css";
-import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { TOKEN_LIST } from "./tokens";
-
 import { toast } from "react-toastify";
 
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
@@ -292,7 +291,6 @@ const WalletStatus = memo(({ connection, onBalanceClick }) => {
     if (!publicKey) return;
     setIsRefreshing(true);
     setRefreshCount((prev) => prev + 1);
-    // Simulate async operation if needed
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
@@ -327,15 +325,35 @@ const WalletStatus = memo(({ connection, onBalanceClick }) => {
             publicKey={publicKey}
             connection={connection}
             onBalanceClick={onBalanceClick}
-            refreshCount={refreshCount} // Passed refreshCount
+            refreshCount={refreshCount}
           />
           <hr className="separator" />
           <StakedBalances
             publicKey={publicKey}
             connection={connection}
             onBalanceClick={onBalanceClick}
-            refreshCount={refreshCount} // Passed refreshCount
+            refreshCount={refreshCount}
           />
+          <div className="lp-links">
+          <button
+              onClick={() => window.open("https://jup.ag/swap/SOL-ORE", "_blank")}
+              className="button lp-button"
+            >
+              Buy ORE
+            </button>
+            <button
+              onClick={() => window.open("https://app.meteora.ag/pools/GgaDTFbqdgjoZz3FP7zrtofGwnRS4E6MCzmmD5Ni1Mxj", "_blank")}
+              className="button lp-button"
+            >
+              ORE-SOL LP
+            </button>
+            <button
+              onClick={() => window.open("https://app.meteora.ag/pools/2vo5uC7jbmb1zNqYpKZfVyewiQmRmbJktma4QHuGNgS5", "_blank")}
+              className="button lp-button"
+            >
+              ORE-ISC LP
+            </button>
+          </div>
         </>
       ) : (
         <p className="no-wallet">No Pubkey Connected</p>
