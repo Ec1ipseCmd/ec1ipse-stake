@@ -900,7 +900,7 @@ function AppContent() {
       </button>
     </div>
     <p className="claim-reward-instruction">
-      Click the <strong>Stake Reward</strong> box to claim rewards.
+      Click the <strong>Stake Rewards</strong> box to claim rewards.
     </p>
   </>
 ) : (

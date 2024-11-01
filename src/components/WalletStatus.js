@@ -54,7 +54,7 @@ const StakingReward = memo(({ publicKey, refreshCount, onClick, isClaimConfirm }
 
   return (
     <div className={`staking-reward ${isClaimConfirm ? "confirming" : ""}`} onClick={onClick}>
-      <h3 className="large-heading-important">Staking Reward</h3>
+      <h3 className="large-heading-important">Stake Rewards</h3>
       <p className="stake-reward-balance">{stakeReward}</p>
     </div>
   );
