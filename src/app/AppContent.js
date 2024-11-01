@@ -44,6 +44,7 @@ function AppContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isStakeActive, setIsStakeActive] = useState(false);
   const [countdown, setCountdown] = useState("");
+  const [isClaimConfirm, setIsClaimConfirm] = useState(false);
 
   const connection = useMemo(
     () => new Connection(process.env.NEXT_PUBLIC_RPC_URL),
@@ -278,6 +279,19 @@ function AppContent() {
       setIsProcessing(false);
     }
   }, [publicKey]);
+
+  const handleStakingRewardClick = useCallback(() => {
+    if (isProcessing) return;
+
+    if (!isClaimConfirm) {
+      setIsClaimConfirm(true);
+      toast.info("Click again to confirm you want to claim rewards.");
+      setTimeout(() => setIsClaimConfirm(false), 6000);
+    } else {
+      handleStakeClaim();
+      setIsClaimConfirm(false);
+    }
+  }, [isClaimConfirm, isProcessing, handleStakeClaim]);
 
   const handleBoostTransaction = useCallback(async () => {
     if (!publicKey) {
@@ -805,7 +819,9 @@ function AppContent() {
               />
             </div>
             <h1 className="site-title">
-              <span>Ec1ipse</span> <span>Staking</span>
+              <span>Ec1ipse</span>
+              <br />
+              <span>Staking</span>
             </h1>
           </div>
           <WalletMultiButton className="wallet-button" />
@@ -815,6 +831,8 @@ function AppContent() {
           <WalletStatus
             connection={connection}
             onBalanceClick={handleBalanceClick}
+            onStakingRewardClick={handleStakingRewardClick}
+            isClaimConfirm={isClaimConfirm}
           />
 
           <hr className="separator" />
@@ -857,51 +875,54 @@ function AppContent() {
           </div>
 
           {publicKey ? (
-            <div className="button-group">
-              <button
-                onClick={handleStakeBoost}
-                className={`button stake-button ${
-                  isStakeActive ? "active" : "inactive"
-                }`}
-                disabled={!isStakeActive || isProcessing}
-              >
-                {isProcessing ? "Processing..." : "Stake Boost"}
-              </button>
-              <button
-                onClick={handleUnstakeBoost}
-                className="button unstake-button"
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Processing..." : "Unstake Boost"}
-              </button>
-              <button
-                onClick={handleStakeClaim}
-                className="button claim-reward-button"
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Processing..." : "Claim Rewards"}
-              </button>
-              
-            </div>
-          ) : (
-            <p className="connect-wallet-message">
-              Please connect your wallet to stake or unstake.
-            </p>
-          )}
+  <>
+    <div className="button-group">
+      <button
+        onClick={handleStakeBoost}
+        className={`button stake-button ${isStakeActive ? "active" : "inactive"}`}
+        disabled={!isStakeActive || isProcessing}
+      >
+        {isProcessing ? "Processing..." : "Stake Boost"}
+      </button>
+      <button
+        onClick={handleUnstakeBoost}
+        className="button unstake-button"
+        disabled={isProcessing}
+      >
+        {isProcessing ? "Processing..." : "Unstake Boost"}
+      </button>
+      <button
+        onClick={handleStakeClaim}
+        className="button claim-reward-button"
+        disabled={true}
+      >
+        Claim Rewards
+      </button>
+    </div>
+    <p className="claim-reward-instruction">
+      Click the <strong>Stake Reward</strong> box to claim rewards.
+    </p>
+  </>
+) : (
+  <p className="connect-wallet-message">
+    Please connect your wallet to stake or unstake.
+  </p>
+)}
         </div>
       </div>
 
       <ToastContainer
-  position="bottom-left"
-  autoClose={6000}
-  hideProgressBar={false}
-  newestOnTop={false}
-  rtl={false}
-  pauseOnFocusLoss
-  draggable={false}
-  pauseOnHover
-  theme="color"
-/>    </>
+        position="bottom-left"
+        autoClose={6000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable={false}
+        pauseOnHover
+        theme="color"
+      />
+    </>
   );
 }
 

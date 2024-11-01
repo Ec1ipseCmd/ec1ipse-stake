@@ -7,7 +7,7 @@
     padding: 0;
     width: 100%;
     min-height: 100vh;
-    font-family: var(--font-roboto); /* Use the font variable here */
+    font-family: var(--font-roboto);
     background-color: #121212;
     color: #e0e0e0;
     box-sizing: border-box;
@@ -273,7 +273,7 @@
     text-decoration: line-through;
 }
 
-.stake-button-button:hover:not(:disabled) {
+.stake-button:hover:not(:disabled) {
     background-color: #1765b4;
     cursor: pointer;
 }
@@ -282,9 +282,11 @@
     background-color: #1765b4;
     cursor: pointer;
 }
+
 .claim-reward-button {
     background-color: #1874cd;
     cursor: pointer;
+    text-decoration: line-through;
 }
 
 .unstake-button {
@@ -314,6 +316,9 @@
     border-radius: 5px;
     text-align: center;
     color: #e0e0e0;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .select-token {
@@ -449,22 +454,8 @@ body::after {
     }
 
     .stake-countdown {
-        margin-top: 20px;
-        background-color: rgba(161, 107, 0, 0.1);
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-align: center;
-        color: #e0e0e0;
-        font-size: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    @media (max-width: 768px) {
-        .stake-countdown {
-            font-size: 0.95rem;
-            padding: 8px 16px;
-        }
+        font-size: 0.95rem;
+        padding: 8px 16px;
     }
 
     @media (max-width: 480px) {
@@ -475,26 +466,8 @@ body::after {
     }
 
     .stake-active {
-        margin-top: 20px;
-        background-color: rgba(76, 175, 80, 0.1);
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-align: center;
-        color: #e0e0e0;
-        font-size: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .stake-active:hover {
-        background-color: rgba(76, 175, 80, 0.15);
-    }
-
-    @media (max-width: 768px) {
-        .stake-active {
-            font-size: 0.95rem;
-            padding: 8px 16px;
-        }
+        font-size: 0.95rem;
+        padding: 8px 16px;
     }
 
     @media (max-width: 480px) {
@@ -587,12 +560,6 @@ body::after {
     }
 }
 
-@media (max-width: 480px) {
-    #tsparticles {
-        display: show;
-    }
-}
-
 @media (max-width: 600px) {
     .amount-input, .select-token {
         max-width: 100%;
@@ -621,13 +588,16 @@ body::after {
     text-align: center;
     width: 100%;
     max-width: 800px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border 0.3s ease;
 }
 
-.staking-reward h3.large-heading-important {
-    font-size: 1.4em;
-    font-weight: bold;
-    color: #e0e0e0;
-    margin: 0;
+.staking-reward:hover {
+    background-color: rgba(42, 42, 42, 1);
+}
+
+.staking-reward.confirming {
+    background-color: rgba(126, 0, 0, 0.85);
 }
 
 .stake-reward-balance {
@@ -636,7 +606,6 @@ body::after {
     color: #e0e0e0;
     margin-top: 10px;
 }
-
 
 @media (max-width: 768px) {
     .staking-reward {
@@ -665,20 +634,20 @@ body::after {
 .balance-item {
     cursor: pointer;
     transition: background-color 0.2s ease;
-  }
+}
   
-  .balance-item:hover {
+.balance-item:hover {
     background-color: rgba(30, 30, 30, 0.75);
-  }
+}
 
 .balance-item.disabled {
     cursor: not-allowed;
     opacity: 0.6;
-  }
+}
   
-  .balance-item.disabled:hover {
+.balance-item.disabled:hover {
     background-color: transparent;
-  }
+}
 
 .balance-item:active {
     background-color: rgba(224, 224, 224, 0.2);
@@ -689,7 +658,6 @@ body::after {
     background-color: rgba(224, 224, 224, 0.15);
 }
 
-/* Toastify Container */
 .Toastify__toast-container {
     width: 90%;
     max-width: 350px;
@@ -698,47 +666,44 @@ body::after {
     bottom: 10px;
     font-family: var(--font-roboto);
     color: #e0e0e0;
-  }
-  
-  /* Toast Notifications Styling */
-  .Toastify__toast {
-    background-color: rgba(51, 51, 51, 0.9); /* Dark gray background */
+}
+
+.Toastify__toast {
+    background-color: rgba(51, 51, 51, 0.9);
     color: #e0e0e0;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     padding: 15px;
     font-size: 0.9rem;
     line-height: 1.5;
-  }
-  
-  /* Specific Toast Types */
-  .Toastify__toast--success {
+}
+
+.Toastify__toast--success {
     background-color: rgba(29, 29, 29, 0.9);
     color: #ffffff;
-  }
-  
-  .Toastify__toast--error {
+}
+
+.Toastify__toast--error {
     background-color: rgba(29, 29, 29, 0.9);
     color: #ffffff;
-  }
-  
-  .Toastify__toast--info {
+}
+
+.Toastify__toast--info {
     background-color: rgba(29, 29, 29, 0.9);
     color: #e0e0e0;
-  }
-  
-  /* Close Button */
-  .Toastify__close-button {
+}
+
+.Toastify__close-button {
     color: #e0e0e0;
     opacity: 0.8;
     font-size: 1.2em;
-  }
-  
-  .Toastify__close-button:hover {
+}
+
+.Toastify__close-button:hover {
     opacity: 1;
-  }
-  
-  .lp-links {
+}
+
+.lp-links {
     text-align: center;
     margin-top: 20px;
 }
@@ -756,4 +721,18 @@ body::after {
 
 .lp-button:hover {
     background-color: #3c1f1f;
+}
+
+.claim-notification {
+    color: #ffcc00;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.claim-reward-instruction {
+    color: #ff4d4d;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1rem;
+    font-weight: bold;
 }
