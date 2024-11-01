@@ -73,11 +73,11 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
     } else {
       setBalances({});
     }
-  }, [publicKey, connection, isFirstLoad, refreshCount]); // Added refreshCount here
+  }, [publicKey, connection, isFirstLoad, refreshCount]);
 
   useEffect(() => {
     fetchBalances();
-  }, [fetchBalances]); // Now, fetchBalances changes when refreshCount changes
+  }, [fetchBalances]); 
 
   const handleClick = (tokenName) => {
     const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);
@@ -145,12 +145,12 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             const text = await response.text();
-            const parsed = parseFloat(text);
-            if (isNaN(parsed)) {
+            const parsedAmount = parseFloat(text);
+            if (isNaN(parsedAmount)) {
               console.warn(`Invalid response for ${tokenName}: ${text}`);
               return { name: tokenName, balance: null };
             }
-            return { name: tokenName, balance: parsed };
+            return { name: tokenName, balance: parsedAmount };
           } catch (error) {
             console.error(`Error fetching staked balance for ${tokenName}:`, error);
             return { name: tokenName, balance: null };
@@ -178,11 +178,11 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
     } catch (error) {
       console.error("Error fetching staked balances:", error);
     }
-  }, [publicKey, mintAddresses, isFirstLoad, connection, refreshCount]); // Added refreshCount here
+  }, [publicKey, mintAddresses, isFirstLoad, connection, refreshCount]);
 
   useEffect(() => {
     fetchStakedBalances();
-  }, [fetchStakedBalances]); // Now, fetchStakedBalances changes when refreshCount changes
+  }, [fetchStakedBalances]);
 
   const handleClick = (tokenName) => {
     const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);
@@ -267,7 +267,7 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
 
 StakingReward.displayName = "StakingReward";
 
-const WalletStatus = memo(({ connection, onBalanceClick }) => {
+const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcessing }) => {
   const { publicKey } = useWallet();
   const [copied, setCopied] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
@@ -321,6 +321,15 @@ const WalletStatus = memo(({ connection, onBalanceClick }) => {
           </div>
           <br />
           <StakingReward publicKey={publicKey} refreshCount={refreshCount} />
+          <div className="claim-rewards-section">
+            <button
+              onClick={onStakeClaim}
+              className="button claim-reward-button"
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Processing..." : "Claim Rewards"}
+            </button>
+          </div>
           <WalletBalances
             publicKey={publicKey}
             connection={connection}
@@ -335,7 +344,7 @@ const WalletStatus = memo(({ connection, onBalanceClick }) => {
             refreshCount={refreshCount}
           />
           <div className="lp-links">
-          <button
+            <button
               onClick={() => window.open("https://jup.ag/swap/SOL-ORE", "_blank")}
               className="button lp-button"
             >

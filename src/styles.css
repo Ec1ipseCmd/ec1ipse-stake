@@ -278,15 +278,6 @@
     cursor: pointer;
 }
 
-.claim-reward-button:hover {
-    background-color: #1765b4;
-    cursor: pointer;
-}
-.claim-reward-button {
-    background-color: #1874cd;
-    cursor: pointer;
-}
-
 .unstake-button {
     background-color: #b71c1c;
 }
@@ -757,3 +748,24 @@ body::after {
 .lp-button:hover {
     background-color: #3c1f1f;
 }
+.claim-rewards-section {
+    display: flex;
+    justify-content: center;
+    margin: 0px 0;
+  }
+
+  .claim-rewards-section {
+    display: flex;
+    justify-content: center;
+    margin: 0 0;
+  }
+  
+  .button.claim-reward-button {
+    background-color: #1874cd;
+    cursor: pointer;
+  }
+  
+  .button.claim-reward-button:hover {
+    background-color: #1765b4;
+    cursor: pointer;
+  }

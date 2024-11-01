@@ -805,7 +805,7 @@ function AppContent() {
               />
             </div>
             <h1 className="site-title">
-              <span>Ec1ipse</span> <span>Staking</span>
+              <span>Ec1ipse</span><br/><span>Staking</span>
             </h1>
           </div>
           <WalletMultiButton className="wallet-button" />
@@ -815,10 +815,13 @@ function AppContent() {
           <WalletStatus
             connection={connection}
             onBalanceClick={handleBalanceClick}
+            onStakeClaim={handleStakeClaim}
+            isProcessing={isProcessing}
           />
 
           <hr className="separator" />
         </div>
+
 
         <StakingTimer
           isStakeActive={isStakeActive}
@@ -874,14 +877,6 @@ function AppContent() {
               >
                 {isProcessing ? "Processing..." : "Unstake Boost"}
               </button>
-              <button
-                onClick={handleStakeClaim}
-                className="button claim-reward-button"
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Processing..." : "Claim Rewards"}
-              </button>
-              
             </div>
           ) : (
             <p className="connect-wallet-message">
@@ -892,16 +887,17 @@ function AppContent() {
       </div>
 
       <ToastContainer
-  position="bottom-left"
-  autoClose={6000}
-  hideProgressBar={false}
-  newestOnTop={false}
-  rtl={false}
-  pauseOnFocusLoss
-  draggable={false}
-  pauseOnHover
-  theme="color"
-/>    </>
+        position="bottom-left"
+        autoClose={6000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable={false}
+        pauseOnHover
+        theme="color"
+      />
+    </>
   );
 }
 
