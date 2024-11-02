@@ -28,21 +28,20 @@
 .container {
     display: block;
     flex-direction: column;
-    align-items: center;
+    align-items:center;
     justify-content: center;
-    padding: 20px;
     min-height: 100vh;
     box-sizing: border-box;
     position: relative;
     z-index: 1;
-    max-width: 550px;
+    max-width: 600px;
     width: 90%;
     margin: 0 auto;
 }
 
 .header {
     width: 100%;
-    max-width: 1200px;
+    max-width: 600px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -88,10 +87,7 @@
     text-overflow: ellipsis;
 }
 
-.wallet-button:hover {
-    background-color: #8c5800;
-}
-
+/* Main middle section with Wallet Balance and Staked balance */
 .wallet-status {
     background-color: rgba(30, 30, 30, 0.75);
     padding: 25px;
@@ -181,22 +177,7 @@
     color: #c70039;
 }
 
-.card {
-    background-color: rgba(30, 30, 30, 0.85);
-    padding: 20px;
-    border-radius: 15px;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    box-sizing: border-box;
-}
 
-.card h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #e0e0e0;
-}
 
 .input-group {
     margin-bottom: 20px;
@@ -409,11 +390,6 @@ body::after {
         font-size: 1.1em;
     }
 
-    .card {
-        padding: 20px;
-        max-width: 90%;
-    }
-
     .button-group {
         flex-direction: column;
         align-items: center;
@@ -542,10 +518,6 @@ body::after {
         font-size: 0.8em;
     }
 
-    .card {
-        padding: 15px;
-        max-width: 95%;
-    }
 
     .amount-input, .select-token {
         max-width: 100%;
@@ -773,3 +745,125 @@ body::after {
     font-size: 0.85em;
     color: #888;
   }
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-top: 25px;
+  justify-content: space-between;
+
+}
+
+.logo-title-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  margin-right: 16px;
+}
+
+.site-title {
+  font-size: 24px;
+  color: #ffffff;
+}
+
+/* Navigation Links Styling */
+.nav-links {
+  display: flex;
+  justify-content: center; /* Center the links */
+  padding: 8px 0;
+}
+
+.nav-link {
+  background-color: #e0e0e0; /* Grey background */
+  color: #000; /* Text color */
+  padding: 8px 16px;
+  margin: 0 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #c0c0c0; /* Darker grey on hover */
+}
+
+/* Balances Section Styling */
+.balances-section {
+  padding: 16px;
+  /* Additional styling as needed */
+}
+
+/* Separator Styling */
+.separator {
+  border: none;
+  border-top: 1px solid #444;
+  margin:0;
+}
+
+/* Card Styling */
+.card {
+  background-color: rgba(30, 30, 30, 0.85);
+  padding: 12px 0 36px;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  align-items: center;
+  max-width: 600px;
+  margin: 12px 0px 36px 0px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card h2 {
+  margin-bottom: 16px;
+  color: #e0e0e0;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.amount-input,
+.select-token {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button-group {
+  display: flex;
+  gap: 23px;
+}
+
+.button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.stake-button {
+  background-color: #4caf50; /* Green for stake */
+  color: #fff;
+}
+
+.unstake-button {
+  background-color: #f44336; /* Red for unstake */
+  color: #fff;
+}
+
+.button:disabled {
+  background-color: #a5d6a7; /* Lighter green when disabled */
+  cursor: not-allowed;
+}
+
+.connect-wallet-message {
+  text-align: center;
+  color: #ff5722;
+  font-weight: bold;
+}

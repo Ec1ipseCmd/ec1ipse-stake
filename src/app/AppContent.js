@@ -811,6 +811,25 @@ function AppContent() {
           <WalletMultiButton className="wallet-button" />
         </header>
 
+        <nav className="nav-links">
+          <a
+            href="https://calc.ec1ipse.me/"
+            className="nav-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Ec1ipse Calc
+          </a>
+          <a
+            href="https://stats.ec1ipse.me/"
+            className="nav-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Ec1ipse Stats
+          </a>
+        </nav>
+
         <div className="balances-section">
           <WalletStatus
             connection={connection}
@@ -821,17 +840,13 @@ function AppContent() {
 
           <hr className="separator" />
         </div>
-
-
-        <StakingTimer
+        <div className="card">
+          <StakingTimer
           isStakeActive={isStakeActive}
           setIsStakeActive={setIsStakeActive}
           countdown={countdown}
           setCountdown={setCountdown}
         />
-
-        <div className="card">
-          <h2>Manage Your Stake</h2>
           <div className="input-group">
             <input
               type="number"
@@ -858,7 +873,6 @@ function AppContent() {
               ))}
             </select>
           </div>
-
           {publicKey ? (
             <div className="button-group">
               <button
@@ -885,7 +899,6 @@ function AppContent() {
           )}
         </div>
       </div>
-
       <ToastContainer
         position="bottom-left"
         autoClose={6000}
