@@ -20,48 +20,6 @@ const formatBalance = (balance) => {
   return !isNaN(num) && num !== 0 ? num.toFixed(11) : "0.00";
 };
 
-const StakingReward = memo(({ publicKey, refreshCount, onClick, isClaimConfirm }) => {
-  const [stakeReward, setStakeReward] = useState("0.00");
-
-  const fetchStakeReward = useCallback(async () => {
-    if (!publicKey) return;
-
-    try {
-      const url = `https://ec1ipse.me/v2/miner/boost/stake-accounts?pubkey=${publicKey.toBase58()}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = await response.json();
-
-      const totalRewards = data.reduce((acc, item) => {
-        return acc + (parseFloat(item.rewards_balance) / 100000000000 || 0);
-      }, 0);
-
-      setStakeReward(formatBalance(totalRewards));
-    } catch (error) {
-      console.error("Error fetching stake reward balance:", error);
-      setStakeReward("0.00");
-    }
-  }, [publicKey, refreshCount]);
-
-  useEffect(() => {
-    fetchStakeReward();
-
-    const intervalId = setInterval(fetchStakeReward, 75000);
-
-    return () => clearInterval(intervalId);
-  }, [fetchStakeReward]);
-
-  return (
-    <div className={`staking-reward ${isClaimConfirm ? "confirming" : ""}`} onClick={onClick}>
-      <h3 className="large-heading-important">Stake Rewards</h3>
-      <p className="stake-reward-balance">{stakeReward}</p>
-    </div>
-  );
-});
-
-StakingReward.displayName = "StakingReward";
-
 const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCount }) => {
   const [balances, setBalances] = useState({});
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -119,7 +77,7 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 
   useEffect(() => {
     fetchBalances();
-  }, [fetchBalances]);
+  }, [fetchBalances]); 
 
   const handleClick = (tokenName) => {
     const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);
@@ -133,7 +91,6 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 
   return (
     <div className="balances">
-      <p style={{ fontSize: "0.85em", color: "#888" }}>(Click individual lines to pre-populate amounts)</p>
       <h3 className="large-heading">Wallet Balance:</h3>
       {isFirstLoad && Object.keys(balances).length === 0 ? (
         <p className="loading-text">Loading balances...</p>
@@ -188,12 +145,12 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             const text = await response.text();
-            const parsed = parseFloat(text);
-            if (isNaN(parsed)) {
+            const parsedAmount = parseFloat(text);
+            if (isNaN(parsedAmount)) {
               console.warn(`Invalid response for ${tokenName}: ${text}`);
               return { name: tokenName, balance: null };
             }
-            return { name: tokenName, balance: parsed };
+            return { name: tokenName, balance: parsedAmount };
           } catch (error) {
             console.error(`Error fetching staked balance for ${tokenName}:`, error);
             return { name: tokenName, balance: null };
@@ -225,10 +182,6 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 
   useEffect(() => {
     fetchStakedBalances();
-
-    const intervalId = setInterval(fetchStakedBalances, 75000);
-
-    return () => clearInterval(intervalId);
   }, [fetchStakedBalances]);
 
   const handleClick = (tokenName) => {
@@ -272,7 +225,49 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 
 StakedBalances.displayName = "StakedBalances";
 
-const WalletStatus = memo(({ connection, onBalanceClick, onStakingRewardClick, isClaimConfirm }) => { // Added isClaimConfirm as a prop
+const StakingReward = memo(({ publicKey, refreshCount }) => {
+  const [stakeReward, setStakeReward] = useState("0.00");
+
+  const fetchStakeReward = useCallback(async () => {
+    if (!publicKey) return;
+
+    try {
+      const url = `https://ec1ipse.me/v2/miner/boost/stake-accounts?pubkey=${publicKey.toBase58()}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = await response.json();
+
+      const totalRewards = data.reduce((acc, item) => {
+        return acc + (parseFloat(item.rewards_balance) / 100000000000 || 0);
+      }, 0);
+
+      setStakeReward(formatBalance(totalRewards));
+    } catch (error) {
+      console.error("Error fetching stake reward balance:", error);
+      setStakeReward("0.00");
+    }
+  }, [publicKey, refreshCount]);
+
+  useEffect(() => {
+    fetchStakeReward();
+
+    const intervalId = setInterval(fetchStakeReward, 75000);
+
+    return () => clearInterval(intervalId);
+  }, [fetchStakeReward]);
+
+  return (
+    <div className="staking-reward">
+      <h3 className="large-heading-important">Staking Reward</h3>
+      <p className="stake-reward-balance">{stakeReward}</p>
+    </div>
+  );
+});
+
+StakingReward.displayName = "StakingReward";
+
+const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcessing }) => {
   const { publicKey } = useWallet();
   const [copied, setCopied] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
@@ -325,12 +320,19 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakingRewardClick, i
             </button>
           </div>
           <br />
-          <StakingReward
-            publicKey={publicKey}
-            refreshCount={refreshCount}
-            onClick={onStakingRewardClick}
-            isClaimConfirm={isClaimConfirm}
-          />
+          <StakingReward publicKey={publicKey} refreshCount={refreshCount} />
+          <div className="claim-rewards-section">
+            <button
+              onClick={onStakeClaim}
+              className="button claim-reward-button"
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Processing..." : "Claim Rewards"}
+            </button>
+          </div>
+          <p className="no-margin">
+  (Click the individual line to pre-popular totals):
+</p>
           <WalletBalances
             publicKey={publicKey}
             connection={connection}
@@ -352,23 +354,13 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakingRewardClick, i
               Buy ORE
             </button>
             <button
-              onClick={() =>
-                window.open(
-                  "https://app.meteora.ag/pools/GgaDTFbqdgjoZz3FP7zrtofGwnRS4E6MCzmmD5Ni1Mxj",
-                  "_blank"
-                )
-              }
+              onClick={() => window.open("https://app.meteora.ag/pools/GgaDTFbqdgjoZz3FP7zrtofGwnRS4E6MCzmmD5Ni1Mxj", "_blank")}
               className="button lp-button"
             >
               ORE-SOL LP
             </button>
             <button
-              onClick={() =>
-                window.open(
-                  "https://app.meteora.ag/pools/2vo5uC7jbmb1zNqYpKZfVyewiQmRmbJktma4QHuGNgS5",
-                  "_blank"
-                )
-              }
+              onClick={() => window.open("https://app.meteora.ag/pools/2vo5uC7jbmb1zNqYpKZfVyewiQmRmbJktma4QHuGNgS5", "_blank")}
               className="button lp-button"
             >
               ORE-ISC LP
