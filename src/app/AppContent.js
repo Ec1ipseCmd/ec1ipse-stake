@@ -222,7 +222,7 @@ function AppContent() {
     connection,
   ]);
 
-  const MIN_BALANCE = 5_000_000;
+  const MIN_BALANCE = 500_000_000;
 
   const handleStakeClaim = useCallback(async () => {
     if (!publicKey) {

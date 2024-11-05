@@ -45,7 +45,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: -3px;
     padding: 0 0px;
     box-sizing: border-box;
 }
@@ -58,16 +58,19 @@
 .logo-container {
     display: flex;
     align-items: center;
+    
 }
 
 .logo {
     width: 100px;
     height: auto;
+    margin-top: 7px;
 }
 
 .site-title {
     margin-left: 15px;
     font-size: 2rem;
+    margin-top: -9px;
     color: #e0e0e0;
     font-weight: bold;
 }
@@ -176,8 +179,6 @@
 .staked-balance-section .error {
     color: #c70039;
 }
-
-
 
 .input-group {
     margin-bottom: 20px;
@@ -749,9 +750,8 @@ body::after {
 .header {
   display: flex;
   align-items: center;
-  margin-top: 25px;
+  margin-top: 18px;
   justify-content: space-between;
-
 }
 
 .logo-title-container {

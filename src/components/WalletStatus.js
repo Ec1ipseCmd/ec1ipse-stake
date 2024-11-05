@@ -330,9 +330,7 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcess
               {isProcessing ? "Processing..." : "Claim Rewards"}
             </button>
           </div>
-          <p className="no-margin">
-  (Click the individual line to pre-popular totals):
-</p>
+          <p className="no-margin">(Click the individual line to pre-popular totals):</p>
           <WalletBalances
             publicKey={publicKey}
             connection={connection}
