@@ -120,8 +120,9 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 WalletBalances.displayName = "WalletBalances";
 
 const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCount }) => {
-  const [stakedBalances, setStakedBalances] = useState({});
+  const [stakedBalances, setStakedBalances] = useState([]);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [totalStakeRewards, setTotalStakeRewards] = useState("0.00");
 
   const mintAddresses = TOKEN_LIST.filter((token) => token.mintAddress).reduce(
     (acc, token) => {
@@ -131,66 +132,53 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
     {}
   );
 
+  const formatFullPrecision = (number) => {
+    const str = number.toString();
+    const [integerPart, decimalPart] = str.split(".");
+    return decimalPart && decimalPart.length > 11
+      ? `${integerPart}.${decimalPart.slice(0, 11)}`
+      : str;
+  };
+
   const fetchStakedBalances = useCallback(async () => {
     if (!publicKey || !connection) return;
 
     try {
-      const baseUrl = "https://ec1ipse.me/v2/miner/boost/stake";
-      const fetchPromises = Object.entries(mintAddresses).map(
-        async ([tokenName, mintAddress]) => {
-          const url = `${baseUrl}?pubkey=${publicKey.toBase58()}&mint=${mintAddress}`;
-          try {
-            const response = await fetch(url);
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const text = await response.text();
-            const parsedAmount = parseFloat(text);
-            if (isNaN(parsedAmount)) {
-              console.warn(`Invalid response for ${tokenName}: ${text}`);
-              return { name: tokenName, balance: null };
-            }
-            return { name: tokenName, balance: parsedAmount };
-          } catch (error) {
-            console.error(`Error fetching staked balance for ${tokenName}:`, error);
-            return { name: tokenName, balance: null };
-          }
-        }
+      const url = `https://ec1ipse.me/v2/miner/boost/stake-accounts?pubkey=${publicKey.toBase58()}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch staked balances");
+
+      const data = await response.json();
+
+      const newStakedBalances = data.map((item) => ({
+        tokenName: Object.keys(mintAddresses).find(
+          (name) => mintAddresses[name] === item.mint_pubkey
+        ) || "Unknown Token",
+        stakedBalance: formatFullPrecision(parseFloat(item.staked_balance) / 1e11),
+        rewardsBalance: formatFullPrecision(parseFloat(item.rewards_balance) / 1e11)
+      }));
+
+      const totalRewards = newStakedBalances.reduce(
+        (sum, item) => sum + parseFloat(item.rewardsBalance),
+        0
       );
 
-      const results = await Promise.all(fetchPromises);
-      const newStakedBalances = results.reduce((acc, curr) => {
-        if (curr.balance !== null) {
-          acc[curr.name] = curr.balance;
-        }
-        return acc;
-      }, {});
+      setStakedBalances(newStakedBalances);
+      setTotalStakeRewards(formatFullPrecision(totalRewards));
+      setIsFirstLoad(false);
 
-      setStakedBalances((prevStakedBalances) => {
-        const prev = JSON.stringify(prevStakedBalances);
-        const current = JSON.stringify(newStakedBalances);
-        if (current !== prev) {
-          if (isFirstLoad) setIsFirstLoad(false);
-          return newStakedBalances;
-        }
-        return prevStakedBalances;
-      });
     } catch (error) {
       console.error("Error fetching staked balances:", error);
     }
-  }, [publicKey, mintAddresses, isFirstLoad, connection, refreshCount]);
+  }, [publicKey, mintAddresses, connection, refreshCount]);
 
   useEffect(() => {
     fetchStakedBalances();
   }, [fetchStakedBalances]);
 
-  const handleClick = (tokenName) => {
-    const selectedToken = TOKEN_LIST.find((token) => token.name === tokenName);
-    if (selectedToken && selectedToken.mintAddress) {
-      const balance = stakedBalances[tokenName];
-      if (balance !== undefined && balance !== null) {
-        onBalanceClick(tokenName, balance);
-      }
+  const handleClick = (tokenName, stakedBalance) => {
+    if (onBalanceClick) {
+      onBalanceClick(tokenName, stakedBalance);
     }
   };
 
@@ -198,26 +186,31 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
     <div className="staked-balances">
       <h3 className="large-heading">Staked Balance:</h3>
       <p style={{ fontSize: "0.85em", color: "#888" }}>(Yield earning):</p>
-      {isFirstLoad && Object.keys(stakedBalances).length === 0 ? (
+      
+      {isFirstLoad && stakedBalances.length === 0 ? (
         <p className="loading-text">Loading staked balances...</p>
       ) : (
-        <ul className="balance-list">
-          {Object.keys(mintAddresses).map((tokenName) => (
-            <li
-              key={tokenName}
-              onClick={() => handleClick(tokenName)}
-              className="balance-item"
-              title="Click to use this staked balance"
-            >
-              <span className="token-name">{tokenName}:</span>
-              <span className="token-balance">
-                {stakedBalances[tokenName] !== undefined && stakedBalances[tokenName] !== null
-                  ? formatBalance(stakedBalances[tokenName])
-                  : "0.00"}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="balance-header">
+            <span className="header-token-name">Token</span>
+            <span className="header-rewards">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rewards (ORE)</span>
+            <span className="header-staked">Staked</span>
+          </div>
+          <ul className="balance-list">
+            {stakedBalances.map(({ tokenName, stakedBalance, rewardsBalance }) => (
+              <li
+                key={tokenName}
+                onClick={() => handleClick(tokenName, stakedBalance)}
+                className="balance-item"
+                title="Click to use this staked balance"
+              >
+                <span className="token-name">{tokenName}</span>
+                <span className="token-rewards">{rewardsBalance}</span>
+                <span className="token-balance">{stakedBalance}</span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );
@@ -261,7 +254,9 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
     <div className="staking-reward">
       <h3 className="large-heading-important">Staking Reward</h3>
       <p className="stake-reward-balance">{stakeReward}</p>
-    </div>
+<p className="notice-text" style={{ fontSize: "0.75em", opacity: 0.5 }}>
+  A minimum of 0.05 ORE is required to claim each specific stake reward account.
+</p>    </div>
   );
 });
 
@@ -330,7 +325,7 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcess
               {isProcessing ? "Processing..." : "Claim Rewards"}
             </button>
           </div>
-          <p className="no-margin">(Click the individual line to pre-popular totals):</p>
+          <p className="no-margin">(Click the individual line to pre-populate totals):</p>
           <WalletBalances
             publicKey={publicKey}
             connection={connection}

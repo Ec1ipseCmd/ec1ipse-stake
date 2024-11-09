@@ -867,3 +867,93 @@ body::after {
   color: #ff5722;
   font-weight: bold;
 }
+.staked-balances {
+    margin: 20px 0;
+  }
+  
+  .large-heading {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  .balance-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .balance-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    cursor: pointer;
+    padding: 5px 0;
+  }
+  
+  .token-name {
+    font-weight: bold;
+    flex-basis: 30%; 
+    text-align: left;
+  }
+  
+  .token-rewards {
+    font-size: 0.85em;
+    color: #888;
+    opacity: 0.5;
+    flex-basis: 40%; 
+    text-align: center;
+  }
+  
+  .token-balance {
+    flex-basis: 40%; 
+    text-align: right;
+  }
+  
+  .staked-balances {
+    margin: 20px 0;
+  }
+  
+  .large-heading {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  .balance-header, .balance-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    font-weight: bold;
+    border-bottom: 1px solid #444;
+  }
+  
+  .balance-header {
+    font-size: 0.9em;
+    color: #aaa;
+  }
+  
+  .header-token-name, .token-name {
+    flex-basis: 30%;
+    text-align: left;
+  }
+  
+  .header-rewards, .token-rewards {
+    flex-basis: 40%;
+    text-align: center;
+    color: #888;
+    white-space: nowrap; /* Prevents text from wrapping */
+    position: relative;
+    left: -35px;
+  }
+  
+  .header-staked, .token-balance {
+    flex-basis: 30%;
+    text-align: right;
+    white-space: nowrap; /* Prevents text from wrapping */
+  }
+  
+  .balance-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
