@@ -1,7 +1,7 @@
 "use client";
 
 import "../styles.css";
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -124,13 +124,15 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [totalStakeRewards, setTotalStakeRewards] = useState("0.00");
 
-  const mintAddresses = TOKEN_LIST.filter((token) => token.mintAddress).reduce(
-    (acc, token) => {
-      acc[token.name] = token.mintAddress;
-      return acc;
-    },
-    {}
-  );
+  const mintAddresses = useMemo(() => {
+    return TOKEN_LIST.filter((token) => token.mintAddress).reduce(
+      (acc, token) => {
+        acc[token.name] = token.mintAddress;
+        return acc;
+      },
+      {}
+    );
+  }, []);
 
   const formatFullPrecision = (number) => {
     const str = number.toString();
@@ -254,9 +256,10 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
     <div className="staking-reward">
       <h3 className="large-heading-important">Staking Reward</h3>
       <p className="stake-reward-balance">{stakeReward}</p>
-<p className="notice-text" style={{ fontSize: "0.75em", opacity: 0.5 }}>
-  A minimum of 0.05 ORE is required to claim each specific stake reward account.
-</p>    </div>
+      <p className="notice-text" style={{ fontSize: "0.75em", opacity: 0.5 }}>
+        A minimum of 0.05 ORE is required to claim each specific stake reward account.
+      </p>
+    </div>
   );
 });
 

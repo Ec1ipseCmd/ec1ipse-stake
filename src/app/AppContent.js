@@ -842,11 +842,11 @@ function AppContent() {
         </div>
         <div className="card">
           <StakingTimer
-          isStakeActive={isStakeActive}
-          setIsStakeActive={setIsStakeActive}
-          countdown={countdown}
-          setCountdown={setCountdown}
-        />
+            isStakeActive={isStakeActive}
+            setIsStakeActive={setIsStakeActive}
+            countdown={countdown}
+            setCountdown={setCountdown}
+          />
           <div className="input-group">
             <input
               type="number"
