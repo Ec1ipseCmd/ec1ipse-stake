@@ -875,7 +875,7 @@ function AppContent() {
           </div>
           {publicKey ? (
             <div className="button-group">
-              <button
+              {/* <button
                 onClick={handleStakeBoost}
                 className={`button stake-button ${
                   isStakeActive ? "active" : "inactive"
@@ -883,7 +883,7 @@ function AppContent() {
                 disabled={!isStakeActive || isProcessing}
               >
                 {isProcessing ? "Processing..." : "Stake Boost"}
-              </button>
+              </button> */}
               <button
                 onClick={handleUnstakeBoost}
                 className="button unstake-button"
@@ -894,7 +894,7 @@ function AppContent() {
             </div>
           ) : (
             <p className="connect-wallet-message">
-              Please connect your wallet to stake or unstake.
+              Please connect your wallet to unstake.
             </p>
           )}
         </div>

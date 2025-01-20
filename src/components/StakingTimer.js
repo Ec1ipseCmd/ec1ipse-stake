@@ -47,9 +47,9 @@ function StakingTimer({
     return (
         <div className="staking-timer">
             {isStakeActive ? (
-                <p className="stake-active">Stake Boost is currently active.</p>
+                <p className="stake-active">Stake Boost is no longer available, please unstake or wait for our 'Migrate' button.</p>
             ) : (
-                countdown && <p className="stake-countdown">Stake Boost is available in: {countdown}</p>
+                countdown && <p className="stake-countdown">Stake Boost is no longer available, please unstake or wait for our 'Migrate' button.</p>
             )}
         </div>
     );
