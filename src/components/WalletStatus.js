@@ -187,7 +187,7 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
   return (
     <div className="staked-balances">
       <h3 className="large-heading">Staked Balance (Ec1ipse):</h3>
-      <p style={{ fontSize: "0.85em", color: "#888" }}>(Yield earning):</p>
+      <p style={{ fontSize: "0.85em", color: "#888" }}>(Yield earning disabled):</p>
       
       {isFirstLoad && stakedBalances.length === 0 ? (
         <p className="loading-text">Loading staked balances...</p>
@@ -195,7 +195,7 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
         <>
           <div className="balance-header">
             <span className="header-token-name">Token</span>
-            <span className="header-rewards">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rewards (ORE)</span>
+            <span className="header-rewards">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rewards</span>
             <span className="header-staked">Staked</span>
           </div>
           <ul className="balance-list">
@@ -207,8 +207,8 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
                 title="Click to use this staked balance"
               >
                 <span className="token-name">{tokenName}</span>
-                <span className="token-rewards">{rewardsBalance}</span>
-                <span className="token-balance">{stakedBalance}</span>
+                <span className="token-rewards">{rewardsBalance}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span className="token-balance">{stakedBalance}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
               </li>
             ))}
           </ul>

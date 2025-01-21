@@ -28,20 +28,20 @@
 .container {
     display: block;
     flex-direction: column;
-    align-items:center;
+    align-items: center;
     justify-content: center;
     min-height: 100vh;
     box-sizing: border-box;
     position: relative;
     z-index: 1;
-    max-width: 600px;
-    width: 90%;
+    max-width: 1000px;  /* Increased from 600px */
+    width: 95%;
     margin: 0 auto;
-}
+  }
 
 .header {
     width: 100%;
-    max-width: 600px;
+    max-width: 1000px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -96,7 +96,7 @@
     padding: 25px;
     border-radius: 10px;
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;  /* Increased from 800px */
     margin-bottom: 30px;
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
     box-sizing: border-box;
@@ -105,7 +105,7 @@
     align-items: stretch;
     justify-content: center;
     text-align: left;
-}
+  }
 
 .wallet-status h2 {
     margin-top: 0;
@@ -280,15 +280,6 @@
     margin-top: 20px;
 }
 
-.countdown {
-    margin-top: 20px;
-    background-color: rgba(199, 166, 0, 0.2);
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-align: center;
-    color: #e0e0e0;
-}
-
 .select-token {
     padding: 10px;
     border: none;
@@ -320,7 +311,7 @@
     gap: 10px;
     flex-wrap: wrap;
     width: 100%;
-    max-width: 600px;
+    max-width: 1000px;
 }
 
 .copy-button {
@@ -346,10 +337,6 @@
     font-size: 0.9em;
 }
 
-.large-heading {
-    font-size: 24px;
-    font-weight: bold;
-}
 
 body::after {
     content: '';
@@ -492,11 +479,6 @@ body::after {
         max-width: 250px;
     }
 
-    .wallet-status {
-        padding: 15px;
-        max-width: 100%;
-    }
-
     .wallet-address-container {
         flex-direction: column;
         align-items: center;
@@ -584,7 +566,7 @@ body::after {
     margin-bottom: 20px;
     text-align: center;
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
 }
 
 .staking-reward h3.large-heading-important {
@@ -627,12 +609,16 @@ body::after {
 }
 
 .balance-item {
+    display: grid;
+    grid-template-columns: 200px 180px 360px 180px;
+    padding: 12px 20px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s;
+    align-items: center;
   }
   
   .balance-item:hover {
-    background-color: rgba(30, 30, 30, 0.75);
+    background-color: rgba(255, 255, 255, 0.05);
   }
 
 .balance-item.disabled {
@@ -771,7 +757,7 @@ body::after {
 /* Navigation Links Styling */
 .nav-links {
   display: flex;
-  justify-content: center; /* Center the links */
+  justify-content: right; /* Center the links */
   padding: 8px 0;
 }
 
@@ -805,16 +791,16 @@ body::after {
 
 /* Card Styling */
 .card {
-  background-color: rgba(30, 30, 30, 0.85);
-  padding: 12px 0 36px;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  align-items: center;
-  max-width: 600px;
-  margin: 12px 0px 36px 0px;
-  width: 100%;
-  box-sizing: border-box;
-}
+    background-color: rgba(30, 30, 30, 0.85);
+    padding: 12px 0 36px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    align-items: center;
+    max-width: 1000px;  /* Increased from 600px */
+    margin: 12px 0px 36px 0px;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
 .card h2 {
   margin-bottom: 16px;
@@ -867,27 +853,16 @@ body::after {
   color: #ff5722;
   font-weight: bold;
 }
+
 .staked-balances {
-    margin: 20px 0;
-  }
-  
-  .large-heading {
-    font-size: 1.2em;
-    font-weight: bold;
+    margin: 20px auto;
+    max-width: 1000px;
   }
   
   .balance-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
-  }
-  
-  .balance-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    cursor: pointer;
-    padding: 5px 0;
   }
   
   .token-name {
@@ -900,7 +875,7 @@ body::after {
     font-size: 0.85em;
     color: #888;
     opacity: 0.5;
-    flex-basis: 40%; 
+    flex-basis: 0%; 
     text-align: center;
   }
   
@@ -916,33 +891,93 @@ body::after {
   .large-heading {
     font-size: 1.2em;
     font-weight: bold;
-  }
-  
-  .balance-header, .balance-item {
-    display: flex;
-    align-items: center;
-    padding: 5px 0;
-    font-weight: bold;
-    border-bottom: 1px solid #444;
+    margin-bottom: 1em;
+    padding-left: 20px;
   }
   
   .balance-header {
-    font-size: 0.9em;
-    color: #aaa;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 12px 20px;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .balance-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 12px 20px;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .staking-amounts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 10px;
   }
   
-  .header-token-name, .token-name {
-    flex-basis: 30%;
-    text-align: left;
+  .staking-value {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    min-width: 140px;
   }
-  
-  .header-rewards, .token-rewards {
-    flex-basis: 40%;
-    text-align: center;
+
+  .staking-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 10px;
     color: #888;
-    white-space: nowrap; /* Prevents text from wrapping */
-    position: relative;
-    left: -35px;
+  }
+  
+  .balance-header {
+    display: grid;
+    grid-template-columns: 200px 180px 360px 180px;
+    padding: 12px 20px;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+  }
+  
+  .header-token-name,
+  .token-name {
+    text-align: left;
+    font-family: var(--font-roboto);
+  }
+
+  .header-staked,
+.staked-value {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  padding-left: 340px;
+}
+
+.header-pending,
+.pending-value {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+
+  
+  .header-ec1ipse,
+  .token-ec1ipse,
+  .header-rewards,
+  .token-rewards {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+  }
+
+  .staking-column {
+    width: 100%;
   }
   
   .header-staked, .token-balance {
@@ -978,6 +1013,19 @@ body::after {
     max-width: 80%;
 }
 
+.stake-message-buttons {
+    margin: 20px auto;
+    background-color: rgba(76, 175, 80, 0.1);
+    padding: 15px 20px;
+    border-radius: 5px;
+    text-align: center;
+    color: #e0e0e0;
+    font-size: 0.8rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease;
+    max-width: 80%;
+}
+
 @media (max-width: 768px) {
     .stake-message {
         font-size: 0.95rem;
@@ -994,3 +1042,82 @@ body::after {
         max-width: 95%;
     }
 }
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 180px;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+  }
+  
+  .button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Eclipse buttons theme */
+  .unstake-button {
+    background: #7e0c0c;
+    color: white;
+    box-shadow: 0 4px 6px rgba(255, 107, 107, 0.2);
+  }
+  
+  .unstake-button:hover:not(:disabled) {
+    background: #FF5252;
+    transform: translateY(-2px);
+  }
+  
+  .migrate-button {
+    background: #4D96FF;
+    color: white;
+    box-shadow: 0 4px 6px rgba(77, 150, 255, 0.2);
+  }
+  
+  .migrate-button:hover:not(:disabled) {
+    background: #3B82F6;
+    transform: translateY(-2px);
+  }
+  
+  /* ORE buttons theme */
+  .stake-ore-button {
+    background: #10B981;
+    color: white;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+  }
+  
+  .stake-ore-button:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+  }
+  
+  .unstake-ore-button {
+    background: #8b6f3f;
+    color: white;
+    box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
+  }
+  
+  .unstake-ore-button:hover:not(:disabled) {
+    background: #D97706;
+    transform: translateY(-2px);
+  }
+
+  
