@@ -17,7 +17,7 @@ const formatPubkey = (pubkey) => {
 
 const formatBalance = (balance) => {
   const num = Number(balance);
-  return !isNaN(num) && num !== 0 ? num.toFixed(11) : "0.00";
+  return !isNaN(num) && num !== 0 ? num.toFixed(11) : "0.00000000000";
 };
 
 const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCount }) => {
@@ -42,7 +42,7 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
             );
 
             const accountInfo = await connection.getAccountInfo(tokenAccount);
-            if (!accountInfo) return { name: token.name, balance: "0.00" };
+            if (!accountInfo) return { name: token.name, balance: "0.00000000000" };
 
             const tokenBalance = await connection.getTokenAccountBalance(tokenAccount);
             const balance = Number(tokenBalance.value.uiAmount) || 0;
@@ -88,41 +88,169 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
       }
     }
   };
-
   return (
-    <div className="balances">
-      <h3 className="large-heading">Wallet Balance:</h3>
-      {isFirstLoad && Object.keys(balances).length === 0 ? (
-        <p className="loading-text">Loading balances...</p>
-      ) : (
-        <ul className="balance-list">
-          {TOKEN_LIST.map((token) => (
-            <li
-              key={token.name}
-              onClick={() => handleClick(token.name)}
-              className={`balance-item ${!token.mintAddress ? "disabled" : ""}`}
-              title={token.mintAddress ? "Click to use this balance" : "Cannot stake SOL"}
-            >
-              <span className="token-name">{token.name}:</span>
-              <span className="token-balance">
-                {balances[token.name] !== undefined && balances[token.name] !== null
-                  ? formatBalance(balances[token.name])
-                  : "0.00"}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+      <div className="balances">
+        <h3 className="large-heading">Wallet Balance:</h3>
+        {isFirstLoad && Object.keys(balances).length === 0 ? (
+          <p className="loading-text">Loading balances...</p>
+        ) : (
+          <ul className="balance-list">
+            {TOKEN_LIST.map((token) => (
+              <li
+                key={token.name}
+                onClick={() => handleClick(token.name)}
+                className={`wallet-balance-item ${!token.mintAddress ? "disabled" : ""}`}
+                title={token.mintAddress ? "Click to use this balance" : "Cannot stake SOL"}
+              >
+                <span className="token-name">{token.name}</span>
+                <span className="token-balance">
+                  {balances[token.name] !== undefined && balances[token.name] !== null
+                    ? formatBalance(balances[token.name])
+                    : "0.00000000000"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
   );
 });
 
 WalletBalances.displayName = "WalletBalances";
 
+
+
+
+
+
+
+// You can add this function in your component or in a separate utility file
+async function getBoostStakeInfo(connection, publicKey) {
+  const PROGRAM_ID = new PublicKey('BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy');
+  const BOOST_MINTS = [
+      '8H8rPiWW4iTFCfEkSnf7jpqeNpFfvdH9gLouAL3Fe2Zx',
+      'DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN',
+      '7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt',
+      'meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb',
+      'oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp',
+  ];
+
+  const findBoostPDA = (mint) => {
+      return PublicKey.findProgramAddressSync(
+          [Buffer.from('boost'), mint.toBuffer()],
+          PROGRAM_ID
+      );
+  };
+
+  const findStakePDA = (authority, boost) => {
+      return PublicKey.findProgramAddressSync(
+          [Buffer.from('stake'), authority.toBuffer(), boost.toBuffer()],
+          PROGRAM_ID
+      );
+  };
+
+
+  const TOKEN_DECIMALS = 11;  // From the ORE token decimals
+  const BOOST_DENOMINATOR = 1000;
+  
+  const KAMINO_MINTS = [
+    '7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt', // Kamino ORE-HNT
+    '8H8rPiWW4iTFCfEkSnf7jpqeNpFfvdH9gLouAL3Fe2Zx'  // Kamino ORE-SOL
+];
+
+// Helper function to convert raw amounts based on mint
+const convertAmount = (rawAmount, mintAddress) => {
+    // Kamino LP tokens use 6 decimals
+    if (KAMINO_MINTS.includes(mintAddress)) {
+        return Number(rawAmount) / Math.pow(10, 6);
+    }
+    // Everything else uses 11 decimals
+    return Number(rawAmount) / Math.pow(10, 11);
+};
+  
+  const decodeBoost = (data) => {
+      // Skip 8 byte discriminator
+      const accountData = data.slice(8);
+      const dataView = new DataView(accountData.buffer, accountData.byteOffset, accountData.byteLength);
+      
+      return {
+          bump: Number(dataView.getBigUint64(0, true)),
+          expiresAt: Number(dataView.getBigInt64(8, true)),
+          locked: Number(dataView.getBigUint64(16, true)),
+          mint: new PublicKey(accountData.slice(24, 56)),
+          multiplier: Number(dataView.getBigUint64(56, true)) / BOOST_DENOMINATOR,
+          totalDeposits: convertAmount(dataView.getBigUint64(64, true)),
+          totalStakers: Number(dataView.getBigUint64(72, true))
+      };
+  };
+  
+  const decodeStake = (data, mintAddress) => {
+    const accountData = data.slice(8);
+    const dataView = new DataView(accountData.buffer, accountData.byteOffset, accountData.byteLength);
+    
+    return {
+        authority: new PublicKey(accountData.slice(0, 32)),
+        balance: convertAmount(dataView.getBigUint64(32, true), mintAddress),
+        balancePending: convertAmount(dataView.getBigUint64(40, true), mintAddress),
+        boost: new PublicKey(accountData.slice(48, 80)),
+        id: Number(dataView.getBigUint64(80, true)),
+        lastDepositAt: Number(dataView.getBigInt64(88, true)),
+        rewards: convertAmount(dataView.getBigUint64(96, true), 'oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp')  // rewards always in ORE (11 decimals)
+    };
+};
+
+const results = [];
+
+for (const mintAddress of BOOST_MINTS) {
+    const mint = new PublicKey(mintAddress);
+    const [boostAddress] = findBoostPDA(mint);
+    const [stakeAddress] = findStakePDA(publicKey, boostAddress);
+
+    try {
+        const [boostAccount, stakeAccount] = await Promise.all([
+            connection.getAccountInfo(boostAddress),
+            connection.getAccountInfo(stakeAddress)
+        ]);
+
+        if (boostAccount && stakeAccount) {
+            const boost = decodeBoost(boostAccount.data);
+            const stake = decodeStake(stakeAccount.data, mintAddress);
+
+            results.push({
+                mint: mintAddress,
+                boost: {
+                    multiplier: Number(boost.multiplier) / 1000,
+                    totalDeposits: convertAmount(boost.totalDeposits, mintAddress),
+                    totalStakers: Number(boost.totalStakers),
+                    expiresAt: Number(boost.expiresAt),
+                    locked: Boolean(boost.locked)
+                },
+                stake: {
+                    balance: stake.balance,
+                    balancePending: stake.balancePending,
+                    rewards: stake.rewards,
+                    lastDepositAt: Number(stake.lastDepositAt)
+                }
+            });
+        }
+    } catch (error) {
+        console.error(`Error fetching data for mint ${mintAddress}:`, error);
+    }
+}
+
+return results;
+}
+
+
+
+
+
+
+
 const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCount }) => {
   const [stakedBalances, setStakedBalances] = useState([]);
+  const [boostStakeInfo, setBoostStakeInfo] = useState([]);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  const [totalStakeRewards, setTotalStakeRewards] = useState("0.00");
 
   const mintAddresses = useMemo(() => {
     return TOKEN_LIST.filter((token) => token.mintAddress).reduce(
@@ -142,6 +270,18 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
       : str;
   };
 
+  useEffect(() => {
+    if (publicKey && connection) {
+        getBoostStakeInfo(connection, publicKey)
+            .then(results => {
+                setBoostStakeInfo(results);
+            })
+            .catch(error => {
+                console.error('Error fetching boost/stake info:', error);
+            });
+    }
+  }, [publicKey, connection, refreshCount]);
+
   const fetchStakedBalances = useCallback(async () => {
     if (!publicKey || !connection) return;
 
@@ -152,36 +292,58 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 
       const data = await response.json();
 
-      const newStakedBalances = data.map((item) => ({
-        tokenName: Object.keys(mintAddresses).find(
+      // Create a map of existing balances
+      const balanceMap = data.reduce((acc, item) => {
+        const tokenName = Object.keys(mintAddresses).find(
           (name) => mintAddresses[name] === item.mint_pubkey
-        ) || "Unknown Token",
-        stakedBalance: formatFullPrecision(parseFloat(item.staked_balance) / 1e11),
-        rewardsBalance: formatFullPrecision(parseFloat(item.rewards_balance) / 1e11)
-      }));
+        ) || "Unknown Token";
+        acc[tokenName] = {
+          stakedEclipse: formatFullPrecision(parseFloat(item.staked_balance) / 1e11),
+          rewardsBalance: formatFullPrecision(parseFloat(item.rewards_balance) / 1e11)
+        };
+        return acc;
+      }, {});
 
-      const totalRewards = newStakedBalances.reduce(
-        (sum, item) => sum + parseFloat(item.rewardsBalance),
-        0
-      );
+      // Create balance entries for all tokens in TOKEN_LIST
+      const newStakedBalances = TOKEN_LIST
+      .filter(token => token.mintAddress)
+      .map(token => {
+        // Find corresponding boost/stake info
+        const boostInfo = boostStakeInfo.find(info => info.mint === token.mintAddress);
+        
+        return {
+          tokenName: token.name,
+          stakedEclipse: balanceMap[token.name]?.stakedEclipse || "0.00000000000",
+          rewardsBalance: balanceMap[token.name]?.rewardsBalance || "0.00000000000",
+          onChainStake: boostInfo?.stake?.balance || 0,        // For column 4
+          onChainPending: boostInfo?.stake?.balancePending || 0,  // For column 5
+          onChainRewards: boostInfo?.stake?.rewards || 0       // For column 6
+        };
+      });
 
       setStakedBalances(newStakedBalances);
-      setTotalStakeRewards(formatFullPrecision(totalRewards));
       setIsFirstLoad(false);
 
     } catch (error) {
       console.error("Error fetching staked balances:", error);
     }
-  }, [publicKey, mintAddresses, connection, refreshCount]);
+  }, [publicKey, mintAddresses, connection, refreshCount, boostStakeInfo]);
 
   useEffect(() => {
     fetchStakedBalances();
   }, [fetchStakedBalances]);
 
-  const handleClick = (tokenName, stakedBalance) => {
+  const handleClick = (tokenName, stakedEclipse) => {
     if (onBalanceClick) {
-      onBalanceClick(tokenName, stakedBalance);
+      onBalanceClick(tokenName, stakedEclipse);
     }
+  };
+
+  const formatNumberConsistently = (number) => {
+    // Convert to number and handle potential NaN/null/undefined
+    const num = Number(number);
+    // Always show 11 decimal places, pad with zeros if needed
+    return !isNaN(num) ? num.toFixed(11) : "0.00000000000";
   };
 
   return (
@@ -193,25 +355,67 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
         <p className="loading-text">Loading staked balances...</p>
       ) : (
         <>
-          <div className="balance-header">
-            <span className="header-token-name">Token</span>
-            <span className="header-rewards">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rewards</span>
-            <span className="header-staked">Staked</span>
+          <div className="balance-table">
+            <div className="balance-header">
+              <div>
+                <span>Token</span>
+              </div>
+              <div>
+                <span>Rewards</span>
+                <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
+                  (Ec1ipse)
+                </p>
+              </div>
+              <div>
+                <span>Staked</span>
+                <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
+                  (Ec1ipse)
+                </p>
+              </div>
+              <div>
+                <span>Staked</span>
+                <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
+                  (ORE)
+                </p>
+              </div>
+              <div>
+                <span>Pending</span>
+                <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
+                  (ORE)
+                </p>
+              </div>
+              <div>
+                <span>Rewards</span>
+                <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
+                  (ORE)
+                </p>
+              </div>
+            </div>
+            <ul className="balance-list">
+              {stakedBalances.map(({ 
+                tokenName, 
+                stakedEclipse, 
+                rewardsBalance, 
+                onChainStake,
+                onChainPending,
+                onChainRewards 
+              }) => (
+                <li
+                  key={tokenName}
+                  onClick={() => handleClick(tokenName, stakedEclipse)}
+                  className="balance-item"
+                  title="Click to use this staked balance"
+                >
+                  <span>{tokenName}</span>
+                  <span>{formatNumberConsistently(rewardsBalance)}</span>
+                  <span>{formatNumberConsistently(stakedEclipse)}</span>
+                  <span>{formatNumberConsistently(onChainStake)}</span>
+                  <span>{formatNumberConsistently(onChainPending)}</span>
+                  <span>{formatNumberConsistently(onChainRewards)}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="balance-list">
-            {stakedBalances.map(({ tokenName, stakedBalance, rewardsBalance }) => (
-              <li
-                key={tokenName}
-                onClick={() => handleClick(tokenName, stakedBalance)}
-                className="balance-item"
-                title="Click to use this staked balance"
-              >
-                <span className="token-name">{tokenName}</span>
-                <span className="token-rewards">{rewardsBalance}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                <span className="token-balance">{stakedBalance}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-              </li>
-            ))}
-          </ul>
         </>
       )}
     </div>
@@ -221,7 +425,7 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 StakedBalances.displayName = "StakedBalances";
 
 const StakingReward = memo(({ publicKey, refreshCount }) => {
-  const [stakeReward, setStakeReward] = useState("0.00");
+  const [stakeReward, setStakeReward] = useState("0.00000000000");
 
   const fetchStakeReward = useCallback(async () => {
     if (!publicKey) return;
@@ -240,7 +444,7 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
       setStakeReward(formatBalance(totalRewards));
     } catch (error) {
       console.error("Error fetching stake reward balance:", error);
-      setStakeReward("0.00");
+      setStakeReward("0.00000000000");
     }
   }, [publicKey, refreshCount]);
 
@@ -254,7 +458,7 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
 
   return (
     <div className="staking-reward">
-      <h3 className="large-heading-important">Staking Reward</h3>
+      <h3 className="large-heading-important">Ec1ipse Staking Reward</h3>
       <p className="stake-reward-balance">{stakeReward}</p>
       <p className="notice-text" style={{ fontSize: "0.75em", opacity: 0.5 }}>
         A minimum of 0.05 ORE is required to claim each specific stake reward account.
@@ -325,7 +529,7 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcess
               className="button claim-reward-button"
               disabled={isProcessing}
             >
-              {isProcessing ? "Processing..." : "Claim Rewards"}
+              {isProcessing ? "Processing..." : "Claim Remaining Rewards"}
             </button>
           </div>
           <p className="no-margin">(Click the individual line to pre-populate totals):</p>
@@ -342,26 +546,6 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcess
             onBalanceClick={onBalanceClick}
             refreshCount={refreshCount}
           />
-          <div className="lp-links">
-            <button
-              onClick={() => window.open("https://jup.ag/swap/SOL-ORE", "_blank")}
-              className="button lp-button"
-            >
-              Buy ORE
-            </button>
-            <button
-              onClick={() => window.open("https://app.meteora.ag/pools/GgaDTFbqdgjoZz3FP7zrtofGwnRS4E6MCzmmD5Ni1Mxj", "_blank")}
-              className="button lp-button"
-            >
-              ORE-SOL LP
-            </button>
-            <button
-              onClick={() => window.open("https://app.meteora.ag/pools/2vo5uC7jbmb1zNqYpKZfVyewiQmRmbJktma4QHuGNgS5", "_blank")}
-              className="button lp-button"
-            >
-              ORE-ISC LP
-            </button>
-          </div>
         </>
       ) : (
         <p className="no-wallet">No Pubkey Connected</p>

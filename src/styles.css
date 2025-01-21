@@ -124,12 +124,6 @@
     box-sizing: border-box;
 }
 
-.balance-list {
-    list-style-type: none;
-    padding: 0; 
-    margin: 0;
-}
-
 .balance-list li {
     display: flex;
     justify-content: space-between;
@@ -144,9 +138,9 @@
 }
 
 .token-name {
-    font-weight: lighter;
-    margin-right: 50px;
-    text-align: left;
+  font-weight: bold;
+  font-family: monospace;
+  min-width: 120px;
 }
 
 .token-amount {
@@ -608,19 +602,6 @@ body::after {
     }
 }
 
-.balance-item {
-    display: grid;
-    grid-template-columns: 200px 180px 360px 180px;
-    padding: 12px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    align-items: center;
-  }
-  
-  .balance-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
 .balance-item.disabled {
     cursor: not-allowed;
     opacity: 0.6;
@@ -859,18 +840,6 @@ body::after {
     max-width: 1000px;
   }
   
-  .balance-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .token-name {
-    font-weight: bold;
-    flex-basis: 30%; 
-    text-align: left;
-  }
-  
   .token-rewards {
     font-size: 0.85em;
     color: #888;
@@ -894,28 +863,6 @@ body::after {
     margin-bottom: 1em;
     padding-left: 20px;
   }
-  
-  .balance-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    padding: 12px 20px;
-    font-weight: bold;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    align-items: center;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .balance-item {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    padding: 12px 20px;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
 
   .staking-amounts {
     display: grid;
@@ -938,17 +885,9 @@ body::after {
     color: #888;
   }
   
-  .balance-header {
-    display: grid;
-    grid-template-columns: 200px 180px 360px 180px;
-    padding: 12px 20px;
-    font-weight: bold;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    align-items: center;
-  }
-  
   .header-token-name,
   .token-name {
+    font-weight: bold;
     text-align: left;
     font-family: var(--font-roboto);
   }
@@ -957,7 +896,7 @@ body::after {
 .staked-value {
   text-align: right;
   font-family: 'Courier New', monospace;
-  padding-left: 340px;
+  padding-left: 40px;
 }
 
 .header-pending,
@@ -972,7 +911,6 @@ body::after {
   .token-ec1ipse,
   .header-rewards,
   .token-rewards {
-    text-align: center;
     font-family: 'Courier New', monospace;
   }
 
@@ -984,12 +922,6 @@ body::after {
     flex-basis: 30%;
     text-align: right;
     white-space: nowrap; /* Prevents text from wrapping */
-  }
-  
-  .balance-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
   }
   
   .migrate-button {
@@ -1119,5 +1051,106 @@ body::after {
     background: #D97706;
     transform: translateY(-2px);
   }
-
   
+  .header-rewards,
+  .header-ore-staked,
+  .header-ore-pending {
+    font-weight: bold;
+    font-size: 0.7em;
+    padding-left: 40px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .header-staked {
+    font-size: 0.7em;
+    padding-right: 30px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .token-name,
+  .token-rewards,
+  .token-balance,
+  .token-ore-staked,
+  .token-ore-pending {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .balance-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+
+.balance-header span:first-child {
+  text-align: left;
+}
+
+.balance-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.balance-item {
+  display: grid;
+  /* Match the header's column layout */
+  grid-template-columns: 100px repeat(5, 1fr);
+  gap: 1rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  text-align: right;
+}
+
+.balance-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.balance-item span:first-child {
+  text-align: left;
+}
+
+.balance-header {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 40px;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+}
+
+.balance-header > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.balance-header span {
+  font-weight: bold;
+  
+}
+
+.wallet-balance-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    padding: 5px;
+    cursor: pointer;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.wallet-balance-item span:first-child {
+    text-align: left;
+}
+
+.wallet-balance-item span:last-child {
+    text-align: right;
+}
+
+.wallet-balance-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

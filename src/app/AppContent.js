@@ -887,6 +887,13 @@ function AppContent() {
         </div>
         
         <div className="button-group ore-buttons">
+        <button
+            onClick={handleFinalUnstake}
+            className="button unstake-ore-button"
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Processing..." : "Unstake (ORE)"}
+          </button>
           <button
             onClick={handleFinalStake}
             className="button stake-ore-button"
@@ -894,18 +901,11 @@ function AppContent() {
           >
             {isProcessing ? "Processing..." : "Stake (ORE)"}
           </button>
-          <button
-            onClick={handleFinalUnstake}
-            className="button unstake-ore-button"
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Unstake (ORE)"}
-          </button>
         </div>
         <p className="stake-message-buttons">
           Unstake (Ec1ipse) unstakes your selected tokens from Ec1ipse.<br />
           Migrate allows you to move your staked funds from Ec1ipse to ORE.<br />
-          Stake (ORE) allows you to stake your tokens from the ORE Boost Program.<br />
+          Stake (ORE) allows you to stake your tokens with the ORE Boost Program.<br />
           Unstake (ORE) allows you to unstake your tokens from the ORE Boost Program.
         </p>
       </div>
