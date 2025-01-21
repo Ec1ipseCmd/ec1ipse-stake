@@ -121,7 +121,9 @@ function AppContent() {
     const pubkeyMapping = {
       "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp": "ORE",
       "DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN": "ORE-SOL LP",
-      "meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb": "ORE-ISC LP"
+      "meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb": "ORE-ISC LP",
+      "8H8rPiWW4iTFCfEkSnf7jpqeNpFfvdH9gLouAL3Fe2Zx": "ORE-SOL Kamino",
+      "7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt": "ORE-HNT Kamino"
     };
   
     try {
@@ -429,9 +431,8 @@ function AppContent() {
       let instructions = [];
 
       // Check if stake account exists, if not create it
-      try {
-        await connection.getAccountInfo(new_stake_pda);
-      } catch (error) {
+      const stakeAccount = await connection.getAccountInfo(new_stake_pda);
+      if (!stakeAccount) {
         const openInstruction = new TransactionInstruction({
           programId: NEW_BOOST_PROGRAM_ID,
           keys: [
@@ -468,6 +469,9 @@ function AppContent() {
       throw error;
     }
   };
+
+
+  
 
 
 
