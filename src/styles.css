@@ -957,3 +957,40 @@ body::after {
     margin: 0;
   }
   
+  .migrate-button {
+    background-color: #4a90e2;
+    color: white;
+    /* Add other styles to match your design */
+  }
+
+  /* Add these new styles to your existing CSS file */
+
+.stake-message {
+    margin: 20px auto;
+    background-color: rgba(76, 175, 80, 0.1);
+    padding: 15px 20px;
+    border-radius: 5px;
+    text-align: center;
+    color: #e0e0e0;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease;
+    max-width: 80%;
+}
+
+@media (max-width: 768px) {
+    .stake-message {
+        font-size: 0.95rem;
+        padding: 12px 16px;
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    .stake-message {
+        font-size: 0.9rem;
+        padding: 10px 12px;
+        margin: 15px auto;
+        max-width: 95%;
+    }
+}

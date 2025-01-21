@@ -10,10 +10,10 @@ import {
   TransactionInstruction,
   SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
-import { getMint, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { getMint, getAssociatedTokenAddressSync, withdrawWithheldTokensFromMintInstructionData } from "@solana/spl-token";
 import WalletStatus from "../components/WalletStatus";
-import StakingTimer from "../components/StakingTimer";
 import dynamic from "next/dynamic";
+import { particlesConfig, initParticles } from './components/particles';
 
 import { Buffer } from "buffer";
 import Script from "next/script";
@@ -54,6 +54,8 @@ function AppContent() {
     () => new PublicKey("mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH"),
     []
   );
+
+  const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
 
   useEffect(() => {
     const fetchDecimals = async () => {
@@ -106,121 +108,6 @@ function AppContent() {
     },
     [miner]
   );
-
-  const handleStakeBoost = useCallback(async () => {
-    if (!publicKey) {
-      toast.error("Please connect your wallet");
-      return;
-    }
-
-    const stakeAmountFloat = parseFloat(amount);
-    if (isNaN(stakeAmountFloat) || stakeAmountFloat <= 0) {
-      toast.error("Please enter a valid amount to stake.");
-      return;
-    }
-
-    try {
-      setIsProcessing(true);
-      const transaction = new Transaction();
-      const staker = publicKey;
-      const mint = new PublicKey(mintAddress);
-      const stakeAmount = BigInt(Math.round(stakeAmountFloat * 10 ** decimals));
-
-      const delegated_boost_address = await getDelegatedBoostAddress(
-        staker,
-        mint
-      );
-
-      const accountInfo = await connection.getAccountInfo(
-        delegated_boost_address
-      );
-      if (!accountInfo) {
-        const initInstruction = await createInitDelegateBoostInstruction(
-          staker,
-          miner,
-          staker,
-          mint
-        );
-        transaction.add(initInstruction);
-      }
-
-      const stakeInstruction = await createStakeBoostInstruction(
-        staker,
-        miner,
-        mint,
-        stakeAmount
-      );
-      transaction.add(stakeInstruction);
-
-      const signature = await sendTransaction(transaction, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-
-      toast.success("Boost account initialized and stake transaction sent successfully!");
-    } catch (error) {
-      console.error("Error staking boost:", error);
-      toast.error(`Error staking boost: ${error.message || error}`);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [
-    publicKey,
-    sendTransaction,
-    amount,
-    mintAddress,
-    decimals,
-    miner,
-    connection,
-    getDelegatedBoostAddress,
-  ]);
-
-  const handleUnstakeBoost = useCallback(async () => {
-    if (!publicKey) {
-      toast.error("Please connect your wallet");
-      return;
-    }
-
-    const unstakeAmountFloat = parseFloat(amount);
-    if (isNaN(unstakeAmountFloat) || unstakeAmountFloat <= 0) {
-      toast.error("Please enter a valid amount to unstake.");
-      return;
-    }
-
-    try {
-      setIsProcessing(true);
-      const transaction = new Transaction();
-      const staker = publicKey;
-      const mint = new PublicKey(mintAddress);
-      const unstakeAmount = BigInt(
-        Math.round(unstakeAmountFloat * 10 ** decimals)
-      );
-
-      const instruction = await createUnstakeBoostInstruction(
-        staker,
-        miner,
-        mint,
-        unstakeAmount
-      );
-      transaction.add(instruction);
-
-      const signature = await sendTransaction(transaction, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-
-      toast.success("Unstake transaction sent successfully!");
-    } catch (error) {
-      console.error("Error unstaking boost:", error);
-      toast.error("Error confirming unstaking boost. Please review totals for confirmation.");
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [
-    publicKey,
-    sendTransaction,
-    amount,
-    mintAddress,
-    decimals,
-    miner,
-    connection,
-  ]);
 
   const MIN_BALANCE = 5_000_000_000;
 
@@ -279,125 +166,72 @@ function AppContent() {
     }
   }, [publicKey]);
 
-  const handleBoostTransaction = useCallback(async () => {
+  const handleMigration = useCallback(async () => {
     if (!publicKey) {
       toast.error("Please connect your wallet");
       return;
     }
-
+  
+    const migrateAmountFloat = parseFloat(amount);
+    if (isNaN(migrateAmountFloat) || migrateAmountFloat <= 0) {
+      toast.error("Please enter a valid amount to migrate.");
+      return;
+    }
+  
     try {
       setIsProcessing(true);
+      const transaction = new Transaction();
       const staker = publicKey;
       const mint = new PublicKey(mintAddress);
-
-      const apiUrl = `https://ec1ipse.me/miner/boost/stake?pubkey=${publicKey.toBase58()}&mint=${mintAddress}`;
-      const response = await fetch(apiUrl);
-
-      let boostAmountFloat = 0;
-
-      if (response.ok) {
-        const amountText = await response.text();
-        const parsedAmount = parseFloat(amountText);
-        if (!isNaN(parsedAmount) && parsedAmount > 0) {
-          boostAmountFloat = parsedAmount;
-        } else {
-          console.warn(
-            "Invalid staked amount fetched from the server. Defaulting to zero."
-          );
-        }
-      } else {
-        console.warn(
-          `Failed to fetch staked amount: ${response.statusText}. Defaulting to zero.`
-        );
-      }
-
-      console.log(`Boost Amount Float: ${boostAmountFloat}`);
-
-      const amountBigInt = BigInt(
-        Math.round(boostAmountFloat * 10 ** decimals)
+      const migrateAmount = BigInt(
+        Math.round(migrateAmountFloat * 10 ** decimals)
       );
-      console.log(`Amount BigInt: ${amountBigInt}`);
-
-      const transaction = new Transaction();
-
-      const programId = new PublicKey(
-        "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
+  
+      const instructions = await createMigrationInstruction(
+        staker,
+        miner,  // Add miner parameter here
+        mint,
+        migrateAmount
       );
+      
+      // Add all instructions to the transaction
+      instructions.forEach(instruction => transaction.add(instruction));
+      
+      console.log("sending transaction");
+      const signature = await sendTransaction(transaction, connection);
+      await connection.confirmTransaction(signature, "confirmed");
+      console.log("SENT transaction");
 
-      const managed_proof_address = PublicKey.findProgramAddressSync(
-        [Buffer.from("managed-proof-account"), miner.toBuffer()],
-        programId
-      )[0];
-
-      const delegated_boost_address = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("v2-delegated-boost"),
-          staker.toBuffer(),
-          mint.toBuffer(),
-          managed_proof_address.toBuffer(),
-        ],
-        programId
-      )[0];
-
-      const accountInfo = await connection.getAccountInfo(
-        delegated_boost_address
-      );
-      if (!accountInfo) {
-        const initInstruction = await createInitDelegateBoostInstruction(
-          staker,
-          miner,
-          staker,
-          mint
-        );
-        transaction.add(initInstruction);
-      }
-
-      if (boostAmountFloat > 0) {
-        const migrateInstruction = await createMigrateInstruction(
-          staker,
-          miner,
-          mint
-        );
-        transaction.add(migrateInstruction);
-      } else {
-        console.warn(
-          "Boost amount is zero. Skipping unstake and stake instructions."
-        );
-      }
-
-      if (transaction.instructions.length > 0) {
-        const signature = await sendTransaction(transaction, connection);
-        await connection.confirmTransaction(signature, "confirmed");
-        console.log("Transaction Sent and Confirmed");
-
-        toast.success("Boost transaction completed successfully!");
-      } else {
-        toast.info("No valid boost transaction to perform.");
-      }
+      toast.success("Migration transaction sent successfully!");
     } catch (error) {
-      console.error("Error performing boost transaction:", error);
-      toast.error(`Error performing boost transaction: ${error.message || error}`);
+      console.error("Error during migration:", error);
+      toast.error("Error during migration. Please review totals for confirmation.");
     } finally {
       setIsProcessing(false);
     }
-  }, [publicKey, sendTransaction, mintAddress, decimals, miner, connection]);
+  }, [
+    publicKey,
+    sendTransaction,
+    amount,
+    mintAddress,
+    decimals,
+    connection,
+    miner,  // Add miner to dependencies
+  ]);
 
-  const createStakeBoostInstruction = async (staker, miner, mint, amount) => {
+  const createMigrationInstruction = async (staker, miner, mint, amount) => {
     try {
-      const programId = new PublicKey(
-        "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
-      );
-      const boostProgramId = new PublicKey(
-        "boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc"
-      );
-
+      const DELEGATION_PROGRAM_ID = new PublicKey("J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we");
+      const OLD_BOOST_PROGRAM_ID = new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc");
+      const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
       const TOKEN_PROGRAM_ID = getTokenProgramId();
-
+  
+      // PDAs for managed proof and delegated boost (using delegation program)
       const managed_proof_address = PublicKey.findProgramAddressSync(
         [Buffer.from("managed-proof-account"), miner.toBuffer()],
-        programId
+        DELEGATION_PROGRAM_ID
       )[0];
-
+  
       const delegated_boost_address = PublicKey.findProgramAddressSync(
         [
           Buffer.from("v2-delegated-boost"),
@@ -405,133 +239,290 @@ function AppContent() {
           mint.toBuffer(),
           managed_proof_address.toBuffer(),
         ],
-        programId
+        DELEGATION_PROGRAM_ID
       )[0];
-
-      const boost_pda = PublicKey.findProgramAddressSync(
+  
+      // PDAs for old boost program (for withdrawal)
+      const old_boost_pda = PublicKey.findProgramAddressSync(
         [Buffer.from("boost"), mint.toBuffer()],
-        boostProgramId
+        OLD_BOOST_PROGRAM_ID
       )[0];
-
-      const stake_pda = PublicKey.findProgramAddressSync(
+  
+      const old_stake_pda = PublicKey.findProgramAddressSync(
         [
           Buffer.from("stake"),
-          managed_proof_address.toBuffer(),
-          boost_pda.toBuffer(),
+          managed_proof_address.toBuffer(), 
+          old_boost_pda.toBuffer()
         ],
-        boostProgramId
+        OLD_BOOST_PROGRAM_ID
       )[0];
-
+  
+      // PDAs for new boost program (for open/deposit)
+      const new_boost_pda = PublicKey.findProgramAddressSync(
+        [Buffer.from("boost"), mint.toBuffer()],
+        NEW_BOOST_PROGRAM_ID
+      )[0];
+  
+      const new_stake_pda = PublicKey.findProgramAddressSync(
+        [Buffer.from("stake"), staker.toBuffer(), new_boost_pda.toBuffer()],
+        NEW_BOOST_PROGRAM_ID
+      )[0];
+  
+      // Get token accounts
       const managed_proof_token_account = getAssociatedTokenAddressSync(
         mint,
         managed_proof_address,
         true
       );
-
       const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
-
-      const boost_tokens_address = getAssociatedTokenAddressSync(
-        mint,
-        boost_pda,
-        true
-      );
-
+      const old_boost_tokens_address = getAssociatedTokenAddressSync(mint, old_boost_pda, true);
+      const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
+  
+      // Create amount buffer
       const amountBuffer = Buffer.alloc(8);
       amountBuffer.writeBigUInt64LE(amount);
-
-      const instruction = new TransactionInstruction({
+  
+      // Create withdraw instruction using delegation program (discriminator: 10)
+      const withdrawInstruction = new TransactionInstruction({
+        programId: DELEGATION_PROGRAM_ID,
         keys: [
           { pubkey: staker, isSigner: true, isWritable: true },
           { pubkey: miner, isSigner: false, isWritable: false },
           { pubkey: managed_proof_address, isSigner: false, isWritable: true },
-          {
-            pubkey: managed_proof_token_account,
-            isSigner: false,
-            isWritable: true,
-          },
-          {
-            pubkey: delegated_boost_address,
-            isSigner: false,
-            isWritable: true,
-          },
-          { pubkey: boost_pda, isSigner: false, isWritable: true },
+          { pubkey: managed_proof_token_account, isSigner: false, isWritable: true },
+          { pubkey: delegated_boost_address, isSigner: false, isWritable: true },
+          { pubkey: old_boost_pda, isSigner: false, isWritable: true },
           { pubkey: mint, isSigner: false, isWritable: false },
           { pubkey: staker_token_account, isSigner: false, isWritable: true },
-          { pubkey: boost_tokens_address, isSigner: false, isWritable: true },
-          { pubkey: stake_pda, isSigner: false, isWritable: true },
-          { pubkey: boostProgramId, isSigner: false, isWritable: false },
+          { pubkey: old_boost_tokens_address, isSigner: false, isWritable: true },
+          { pubkey: old_stake_pda, isSigner: false, isWritable: true },
+          { pubkey: OLD_BOOST_PROGRAM_ID, isSigner: false, isWritable: false },
           { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
         ],
-        programId: programId,
-        data: Buffer.concat([Buffer.from([9]), amountBuffer]),
+        data: Buffer.concat([Buffer.from([10]), amountBuffer])
       });
+  
+      // Create open instruction using new boost program
 
-      return instruction;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const createMigrateInstruction = async (staker, miner, mint) => {
-    try {
-      const programId = new PublicKey(
-        "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
-      );
-      const boostProgramId = new PublicKey(
-        "boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc"
-      );
-
-      const managed_proof_address = PublicKey.findProgramAddressSync(
-        [Buffer.from("managed-proof-account"), miner.toBuffer()],
-        programId
-      )[0];
-
-      const delegated_boost_address_v2 = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("v2-delegated-boost"),
-          staker.toBuffer(),
-          mint.toBuffer(),
-          managed_proof_address.toBuffer(),
-        ],
-        programId
-      )[0];
-
-      const delegated_boost_address = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("delegated-boost"),
-          staker.toBuffer(),
-          mint.toBuffer(),
-          managed_proof_address.toBuffer(),
-        ],
-        programId
-      )[0];
-
-      const instruction_v1 = new TransactionInstruction({
+      let instructions = [withdrawInstruction];
+      try {
+        await connection.getAccountInfo(new_stake_pda);
+      } catch (error) {
+      const openInstruction = new TransactionInstruction({
+        programId: NEW_BOOST_PROGRAM_ID,
         keys: [
           { pubkey: staker, isSigner: true, isWritable: true },
-          { pubkey: miner, isSigner: false, isWritable: false },
-          { pubkey: managed_proof_address, isSigner: false, isWritable: true },
-          {
-            pubkey: delegated_boost_address,
-            isSigner: false,
-            isWritable: true,
-          },
-          {
-            pubkey: delegated_boost_address_v2,
-            isSigner: false,
-            isWritable: true,
-          },
+          { pubkey: staker, isSigner: true, isWritable: true }, // payer
+          { pubkey: new_boost_pda, isSigner: false, isWritable: true },
           { pubkey: mint, isSigner: false, isWritable: false },
+          { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
         ],
-        programId: programId,
-        data: Buffer.from([12]),
+        data: Buffer.from([2]) // Open discriminator
       });
+        instructions.push(openInstruction);
+      }
+  
+      // Create deposit instruction using new boost program
 
-      return instruction_v1;
+      const depositInstruction = new TransactionInstruction({
+        programId: NEW_BOOST_PROGRAM_ID,
+        keys: [
+          { pubkey: staker, isSigner: true, isWritable: true },
+          { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+          { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
+          { pubkey: mint, isSigner: false, isWritable: false },
+          { pubkey: staker_token_account, isSigner: false, isWritable: true },
+          { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+        ],
+        data: Buffer.concat([Buffer.from([1]), amountBuffer]) // Deposit discriminator + amount
+      });
+        instructions.push(depositInstruction);
+  
+      return instructions;
     } catch (error) {
       throw error;
     }
   };
+
+
+
+
+
+
+
+  const handleFinalStake = useCallback(async () => {
+    if (!publicKey) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+  
+    const stakeAmountFloat = parseFloat(amount);
+    if (isNaN(stakeAmountFloat) || stakeAmountFloat <= 0) {
+      toast.error("Please enter a valid amount to stake.");
+      return;
+    }
+  
+    try {
+      setIsProcessing(true);
+      const transaction = new Transaction();
+      const staker = publicKey;
+      const mint = new PublicKey(mintAddress);
+      const stakeAmount = BigInt(
+        Math.round(stakeAmountFloat * 10 ** decimals)
+      );
+  
+      const instructions = await createStakeInstruction(
+        staker,
+        mint,
+        stakeAmount
+      );
+      
+      instructions.forEach(instruction => transaction.add(instruction));
+      
+      console.log("sending transaction");
+      const signature = await sendTransaction(transaction, connection);
+      await connection.confirmTransaction(signature, "confirmed");
+      console.log("SENT transaction");
+
+      toast.success("Stake transaction sent successfully!");
+    } catch (error) {
+      console.error("Error during staking:", error);
+      toast.error("Error during staking. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [
+    publicKey,
+    sendTransaction,
+    amount,
+    mintAddress,
+    decimals,
+    connection
+  ]);
+
+  const createStakeInstruction = async (staker, mint, amount) => {
+    try {
+      const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
+      const TOKEN_PROGRAM_ID = getTokenProgramId();
+  
+      // PDAs for new boost program
+      const new_boost_pda = PublicKey.findProgramAddressSync(
+        [Buffer.from("boost"), mint.toBuffer()],
+        NEW_BOOST_PROGRAM_ID
+      )[0];
+  
+      const new_stake_pda = PublicKey.findProgramAddressSync(
+        [Buffer.from("stake"), staker.toBuffer(), new_boost_pda.toBuffer()],
+        NEW_BOOST_PROGRAM_ID
+      )[0];
+  
+      // Get token accounts
+      const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
+      const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
+  
+      // Create amount buffer
+      const amountBuffer = Buffer.alloc(8);
+      amountBuffer.writeBigUInt64LE(amount);
+  
+      let instructions = [];
+
+      // Check if stake account exists, if not create it
+      try {
+        await connection.getAccountInfo(new_stake_pda);
+      } catch (error) {
+        const openInstruction = new TransactionInstruction({
+          programId: NEW_BOOST_PROGRAM_ID,
+          keys: [
+            { pubkey: staker, isSigner: true, isWritable: true },
+            { pubkey: staker, isSigner: true, isWritable: true }, // payer
+            { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+            { pubkey: mint, isSigner: false, isWritable: false },
+            { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+            { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+          ],
+          data: Buffer.from([2]) // Open discriminator
+        });
+        instructions.push(openInstruction);
+      }
+  
+      // Create deposit instruction
+      const depositInstruction = new TransactionInstruction({
+        programId: NEW_BOOST_PROGRAM_ID,
+        keys: [
+          { pubkey: staker, isSigner: true, isWritable: true },
+          { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+          { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
+          { pubkey: mint, isSigner: false, isWritable: false },
+          { pubkey: staker_token_account, isSigner: false, isWritable: true },
+          { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+        ],
+        data: Buffer.concat([Buffer.from([1]), amountBuffer]) // Deposit discriminator + amount
+      });
+      instructions.push(depositInstruction);
+  
+      return instructions;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+
+
+
+
+
+
+  const handleUnstakeBoost = useCallback(async () => {
+    if (!publicKey) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+
+    const unstakeAmountFloat = parseFloat(amount);
+    if (isNaN(unstakeAmountFloat) || unstakeAmountFloat <= 0) {
+      toast.error("Please enter a valid amount to unstake.");
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const transaction = new Transaction();
+      const staker = publicKey;
+      const mint = new PublicKey(mintAddress);
+      const unstakeAmount = BigInt(
+        Math.round(unstakeAmountFloat * 10 ** decimals)
+      );
+
+      const instruction = await createUnstakeBoostInstruction(
+        staker,
+        miner,
+        mint,
+        unstakeAmount
+      );
+      transaction.add(instruction);
+
+      const signature = await sendTransaction(transaction, connection);
+      await connection.confirmTransaction(signature, "confirmed");
+
+      toast.success("Unstake transaction sent successfully!");
+    } catch (error) {
+      console.error("Error unstaking boost:", error);
+      toast.error("Error confirming unstaking boost. Please review totals for confirmation.");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [
+    publicKey,
+    sendTransaction,
+    amount,
+    mintAddress,
+    decimals,
+    miner,
+    connection,
+  ]);
 
   const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
     try {
@@ -595,16 +586,8 @@ function AppContent() {
           { pubkey: staker, isSigner: true, isWritable: true },
           { pubkey: miner, isSigner: false, isWritable: false },
           { pubkey: managed_proof_address, isSigner: false, isWritable: true },
-          {
-            pubkey: managed_proof_token_account,
-            isSigner: false,
-            isWritable: true,
-          },
-          {
-            pubkey: delegated_boost_address,
-            isSigner: false,
-            isWritable: true,
-          },
+          { pubkey: managed_proof_token_account,isSigner: false,isWritable: true },
+          { pubkey: delegated_boost_address,isSigner: false,isWritable: true },
           { pubkey: boost_pda, isSigner: false, isWritable: true },
           { pubkey: mint, isSigner: false, isWritable: false },
           { pubkey: staker_token_account, isSigner: false, isWritable: true },
@@ -623,295 +606,148 @@ function AppContent() {
     }
   };
 
-  const createInitDelegateBoostInstruction = async (
-    staker,
-    miner,
-    payer,
-    mint
-  ) => {
-    try {
-      const programId = new PublicKey(
-        "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
-      );
-      const boostProgramId = new PublicKey(
-        "boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc"
-      );
-
-      const managed_proof_address = PublicKey.findProgramAddressSync(
-        [Buffer.from("managed-proof-account"), miner.toBuffer()],
-        programId
-      )[0];
-
-      const delegated_boost_address = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("v2-delegated-boost"),
-          staker.toBuffer(),
-          mint.toBuffer(),
-          managed_proof_address.toBuffer(),
-        ],
-        programId
-      )[0];
-
-      const boost_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        boostProgramId
-      )[0];
-
-      const instruction = new TransactionInstruction({
-        keys: [
-          { pubkey: staker, isSigner: false, isWritable: true },
-          { pubkey: miner, isSigner: false, isWritable: true },
-          { pubkey: payer, isSigner: true, isWritable: true },
-          { pubkey: managed_proof_address, isSigner: false, isWritable: true },
-          {
-            pubkey: delegated_boost_address,
-            isSigner: false,
-            isWritable: true,
-          },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
-          {
-            pubkey: SystemProgram.programId,
-            isSigner: false,
-            isWritable: false,
-          },
-        ],
-        programId: programId,
-        data: Buffer.from([11]),
-      });
-
-      return instruction;
-    } catch (error) {
-      throw error;
-    }
-  };
-
   const formatBalanceApp = (balance) => {
     const num = Number(balance);
     return !isNaN(num) ? num.toFixed(2) : "0.00";
-  };
-
-  const particlesConfig = {
-    background: {
-      color: {
-        value: "#121212",
-      },
-    },
-    fpsLimit: 60,
-    interactivity: {
-      events: {
-        onHover: {
-          enable: false,
-          mode: "repulse",
-        },
-        onClick: {
-          enable: true,
-          mode: "push",
-        },
-        resize: true,
-      },
-      modes: {
-        repulse: {
-          distance: 100,
-          duration: 0.4,
-        },
-        push: {
-          quantity: 4,
-        },
-      },
-    },
-    particles: {
-      color: {
-        value: "#e0e0e0",
-      },
-      links: {
-        enable: false,
-      },
-      collisions: {
-        enable: false,
-      },
-      move: {
-        direction: "none",
-        enable: true,
-        outModes: {
-          default: "bounce",
-        },
-        random: true,
-        speed: 0.7,
-        straight: false,
-      },
-      number: {
-        density: {
-          enable: true,
-          area: 800,
-        },
-        value: 100,
-      },
-      opacity: {
-        value: 0.5,
-        random: true,
-      },
-      shape: {
-        type: "circle",
-      },
-      size: {
-        value: { min: 1, max: 6 },
-      },
-    },
-    detectRetina: true,
-  };
-
-  const initParticles = () => {
-    if (window.tsParticles) {
-      window.tsParticles.load("tsparticles", particlesConfig);
-    } else {
-      console.error("tsParticles not loaded");
-    }
   };
 
   return (
     <>
       <div id="tsparticles"></div>
 
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-Y6S4ZYT334"
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-Y6S4ZYT334');
-        `}
-      </Script>
+<Script
+  src="https://www.googletagmanager.com/gtag/js?id=G-Y6S4ZYT334"
+  strategy="afterInteractive"
+/>
+<Script id="google-analytics" strategy="afterInteractive">
+  {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Y6S4ZYT334');
+  `}
+</Script>
 
-      <Script
-        src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"
-        strategy="afterInteractive"
-        onLoad={initParticles}
-      />
+<Script
+  src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"
+  strategy="afterInteractive"
+  onLoad={initParticles}
+/>
 
-      <div className="container">
-        <header className="header">
-          <div className="logo-title-container">
-            <div className="logo-container">
-              <Image
-                src="/eclipse-icon.png"
-                alt="Ec1ipse Stake Logo"
-                width={150}
-                height={50}
-                className="logo"
-              />
-            </div>
-            <h1 className="site-title">
-              <span>Ec1ipse</span><span>Staking</span>
-            </h1>
-          </div>
-          <WalletMultiButton className="wallet-button" />
-        </header>
-
-        <nav className="nav-links">
-          <a
-            href="https://calc.ec1ipse.me/"
-            className="nav-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Ec1ipse Calc
-          </a>
-          <a
-            href="https://stats.ec1ipse.me/"
-            className="nav-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Ec1ipse Stats
-          </a>
-        </nav>
-
-        <div className="balances-section">
-          <WalletStatus
-            connection={connection}
-            onBalanceClick={handleBalanceClick}
-            onStakeClaim={handleStakeClaim}
-            isProcessing={isProcessing}
-          />
-
-          <hr className="separator" />
-        </div>
-        <div className="card">
-          <StakingTimer
-            isStakeActive={isStakeActive}
-            setIsStakeActive={setIsStakeActive}
-            countdown={countdown}
-            setCountdown={setCountdown}
-          />
-          <div className="input-group">
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-              className="amount-input"
-              min="0"
-              step="any"
-              disabled={isProcessing && !isStakeActive}
-            />
-          </div>
-
-          <div className="input-group">
-            <select
-              value={mintAddress || ""}
-              onChange={(e) => setMintAddress(e.target.value || null)}
-              className="select-token"
-            >
-              {TOKEN_LIST.filter((token) => token.mintAddress).map((token) => (
-                <option key={token.name} value={token.mintAddress}>
-                  {token.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          {publicKey ? (
-            <div className="button-group">
-              {/* <button
-                onClick={handleStakeBoost}
-                className={`button stake-button ${
-                  isStakeActive ? "active" : "inactive"
-                }`}
-                disabled={!isStakeActive || isProcessing}
-              >
-                {isProcessing ? "Processing..." : "Stake Boost"}
-              </button> */}
-              <button
-                onClick={handleUnstakeBoost}
-                className="button unstake-button"
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Processing..." : "Unstake Boost"}
-              </button>
-            </div>
-          ) : (
-            <p className="connect-wallet-message">
-              Please connect your wallet to unstake.
-            </p>
-          )}
-        </div>
+<div className="container">
+  <header className="header">
+    <div className="logo-title-container">
+      <div className="logo-container">
+        <Image
+          src="/eclipse-icon.png"
+          alt="Ec1ipse Stake Logo"
+          width={150}
+          height={50}
+          className="logo"
+        />
       </div>
-      <ToastContainer
-        position="bottom-left"
-        autoClose={6000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable={false}
-        pauseOnHover
-        theme="color"
+      <h1 className="site-title">
+        <span>Ec1ipse</span><span>Staking</span>
+      </h1>
+    </div>
+    <WalletMultiButton className="wallet-button" />
+  </header>
+
+  <nav className="nav-links">
+    <a
+      href="https://stats.ec1ipse.me/"
+      className="nav-link"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Ec1ipse Stats
+    </a>
+  </nav>
+
+  <div className="balances-section">
+    <WalletStatus
+      connection={connection}
+      onBalanceClick={handleBalanceClick}
+      onStakeClaim={handleStakeClaim}
+      isProcessing={isProcessing}
+    />
+
+    <hr className="separator" />
+  </div>
+  <div className="card">
+    <p className="stake-message">
+      Stake Boost is no longer available. To continue earning staking rewards, please utilize the buttons below!
+    </p>
+    <div className="input-group">
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="Enter amount"
+        className="amount-input"
+        min="0"
+        step="any"
+        disabled={isProcessing}
       />
-    </>
-  );
+    </div>
+
+    <div className="input-group">
+      <select
+        value={mintAddress || ""}
+        onChange={(e) => setMintAddress(e.target.value || null)}
+        className="select-token"
+      >
+        {TOKEN_LIST.filter((token) => token.mintAddress).map((token) => (
+          <option key={token.name} value={token.mintAddress}>
+            {token.name}
+          </option>
+        ))}
+      </select>
+    </div>
+    {publicKey ? (
+      <div className="button-group">
+        <button
+          onClick={handleUnstakeBoost}
+          className="button unstake-button"
+          disabled={isProcessing}
+        >
+          {isProcessing ? "Processing..." : "Unstake (Ec1ipse)"}
+        </button>
+        <button
+          onClick={handleMigration}
+          className="button migrate-button"
+          disabled={isProcessing}
+        >
+          {isProcessing ? "Processing..." : "Migrate (Ec1ipse → ORE)"}
+        </button>
+        <button
+          onClick={handleFinalStake}
+          className="button migrate-button"
+          disabled={isProcessing}
+        >
+          {isProcessing ? "Processing..." : "Stake (ORE)"}
+        </button>
+      </div>
+    ) : (
+      <p className="connect-wallet-message">
+        Please connect your wallet to unstake.
+      </p>
+    )}
+  </div>
+</div>
+<ToastContainer
+  position="bottom-left"
+  autoClose={6000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  rtl={false}
+  pauseOnFocusLoss
+  draggable={false}
+  pauseOnHover
+  theme="color"
+/>
+</>
+);
 }
 
 export default AppContent;
