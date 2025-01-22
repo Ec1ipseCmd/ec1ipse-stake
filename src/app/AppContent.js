@@ -121,9 +121,7 @@ function AppContent() {
     const pubkeyMapping = {
       "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp": "ORE",
       "DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN": "ORE-SOL LP",
-      "meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb": "ORE-ISC LP",
-      "8H8rPiWW4iTFCfEkSnf7jpqeNpFfvdH9gLouAL3Fe2Zx": "ORE-SOL Kamino",
-      "7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt": "ORE-HNT Kamino"
+      "meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb": "ORE-ISC LP"
     };
   
     try {
@@ -505,9 +503,104 @@ function AppContent() {
 
 
 
+  async function getAccountsData(connection, publicKey) {
+    // Build array of all accounts we need to fetch
+    const accountsToFetch = [];
+    
+    // Add token accounts
+    TOKEN_LIST.forEach(token => {
+        if (token.mintAddress) {  // Skip SOL
+            const mintPublicKey = new PublicKey(token.mintAddress);
+            const tokenAccount = getAssociatedTokenAddressSync(
+                mintPublicKey,
+                publicKey,
+                false,
+                TOKEN_PROGRAM_ID
+            );
+            accountsToFetch.push(tokenAccount);
+        }
+    });
 
+    // Add boost and stake accounts
+    const BOOST_MINTS = [
+        '8H8rPiWW4iTFCfEkSnf7jpqeNpFfvdH9gLouAL3Fe2Zx',
+        'DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN',
+        '7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt',
+        'meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb',
+        'oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp',
+    ];
 
+    BOOST_MINTS.forEach(mintAddress => {
+        const mint = new PublicKey(mintAddress);
+        const [boostAddress] = findBoostPDA(mint);
+        const [stakeAddress] = findStakePDA(publicKey, boostAddress);
+        accountsToFetch.push(boostAddress);
+        accountsToFetch.push(stakeAddress);
+    });
 
+    // Get SOL balance in same batch by adding publicKey
+    accountsToFetch.push(publicKey);
+
+    // Fetch all accounts in one request
+    const accounts = await connection.getMultipleAccountsInfo(accountsToFetch);
+
+    // Process results
+    const results = {
+        tokenBalances: {},
+        boostStakeInfo: [],
+        solBalance: 0
+    };
+
+    let accountIndex = 0;
+
+    // Process token accounts
+    TOKEN_LIST.forEach(token => {
+        if (token.mintAddress) {
+            const accountInfo = accounts[accountIndex++];
+            if (accountInfo) {
+                // Parse token account data
+                const data = Buffer.from(accountInfo.data);
+                // You'll need to implement parseTokenAccount based on SPL token account layout
+                const amount = parseTokenAccount(data);
+                results.tokenBalances[token.name] = amount;
+            } else {
+                results.tokenBalances[token.name] = 0;
+            }
+        }
+    });
+
+    // Process boost and stake accounts
+    BOOST_MINTS.forEach(mintAddress => {
+        const boostAccount = accounts[accountIndex++];
+        const stakeAccount = accounts[accountIndex++];
+        
+        if (boostAccount && stakeAccount) {
+            const boost = decodeBoost(boostAccount.data);
+            const stake = decodeStake(stakeAccount.data, mintAddress);
+            
+            results.boostStakeInfo.push({
+                mint: mintAddress,
+                boost,
+                stake
+            });
+        }
+    });
+
+    // Process SOL balance
+    const solAccount = accounts[accountIndex];
+    if (solAccount) {
+        results.solBalance = solAccount.lamports / 1e9;
+    }
+
+    return results;
+}
+
+function parseTokenAccount(data) {
+  const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  // Token account amount is at offset 64
+  const amount = dataView.getBigUint64(64, true);
+  return Number(amount);
+}
 
 
 
@@ -876,21 +969,21 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
             className="button stake-ore-button"
             disabled={isProcessing}
           >
-            {isProcessing ? "Processing..." : "Stake (ORE)"}
+            {isProcessing ? "Processing..." : "Stake (Global)"}
           </button>
           <button
             onClick={handleOreUnstake}
             className="button unstake-ore-button"
             disabled={isProcessing}
           >
-            {isProcessing ? "Processing..." : "Unstake (ORE)"}
+            {isProcessing ? "Processing..." : "Unstake (Global)"}
           </button>
         </div>
         <p className="stake-message-buttons">
           Unstake (Ec1ipse) unstakes your selected tokens from Ec1ipse.<br />
-          Migrate allows you to move your staked funds from Ec1ipse to ORE.<br />
-          Stake (ORE) allows you to stake your tokens with the ORE Boost Program.<br />
-          Unstake (ORE) allows you to unstake your tokens from the ORE Boost Program.
+          Migrate allows you to move your staked funds from Ec1ipse to Global Stake.<br />
+          Stake (Global) allows you to stake your tokens with the Global Stake Program.<br />
+          Unstake (Global) allows you to unstake your tokens from the Global Stake Program.
         </p>
       </div>
     ) : (

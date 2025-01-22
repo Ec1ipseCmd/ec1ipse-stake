@@ -375,19 +375,19 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
               <div>
                 <span>Staked</span>
                 <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
-                  (ORE)
+                  (Global)
                 </p>
               </div>
               <div>
                 <span>Pending</span>
                 <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
-                  (ORE)
+                  (Global)
                 </p>
               </div>
               <div>
                 <span>Rewards</span>
                 <p style={{ fontSize: "0.85em", color: "#888", margin: "2px 0 0 0" }}>
-                  (ORE)
+                  (Global)
                 </p>
               </div>
             </div>
