@@ -234,6 +234,11 @@ function AppContent() {
     miner
   ]);
 
+
+
+
+
+
   const createMigrationInstruction = async (staker, miner, mint, amount) => {
     try {
       const DELEGATION_PROGRAM_ID = new PublicKey("J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we");
@@ -380,7 +385,7 @@ function AppContent() {
 
 
 
-  const handleFinalStake = useCallback(async () => {
+  const handleOreStake = useCallback(async () => {
     if (!publicKey) {
       toast.error("Please connect your wallet");
       return;
@@ -401,7 +406,7 @@ function AppContent() {
         Math.round(stakeAmountFloat * 10 ** decimals)
       );
   
-      const instructions = await createStakeInstruction(
+      const instructions = await createOreStakeInstruction(
         staker,
         mint,
         stakeAmount
@@ -429,31 +434,7 @@ function AppContent() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  const createStakeInstruction = async (staker, mint, amount) => {
+  const createOreStakeInstruction = async (staker, mint, amount) => {
     try {
       const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
       const TOKEN_PROGRAM_ID = getTokenProgramId();
@@ -531,7 +512,7 @@ function AppContent() {
 
 
 
-  const handleFinalUnstake = useCallback(async () => {
+  const handleOreUnstake = useCallback(async () => {
     if (!publicKey) {
       toast.error("Please connect your wallet");
       return;
@@ -552,7 +533,7 @@ function AppContent() {
         Math.round(unstakeAmountFloat * 10 ** decimals)
       );
   
-      const withdrawInstruction = await createWithdrawInstruction(
+      const withdrawInstruction = await createOreUnstake(
         withdrawer,
         mint,
         withdrawAmount
@@ -578,7 +559,10 @@ function AppContent() {
     connection
   ]);
   
-  const createWithdrawInstruction = async (withdrawer, mint, amount) => {
+
+
+
+const createOreUnstake = async (withdrawer, mint, amount) => {
     try {
       const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
       const TOKEN_PROGRAM_ID = getTokenProgramId();
@@ -608,7 +592,7 @@ function AppContent() {
         keys: [
           { pubkey: withdrawer, isSigner: true, isWritable: true },
           { pubkey: withdrawer_token_account, isSigner: false, isWritable: true },
-          { pubkey: new_boost_pda, isSigner: false, isWritable: false },
+          { pubkey: new_boost_pda, isSigner: false, isWritable: true },
           { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
           { pubkey: mint, isSigner: false, isWritable: false },
           { pubkey: new_stake_pda, isSigner: false, isWritable: true },
@@ -887,19 +871,19 @@ function AppContent() {
         </div>
         
         <div className="button-group ore-buttons">
-        <button
-            onClick={handleFinalUnstake}
-            className="button unstake-ore-button"
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Unstake (ORE)"}
-          </button>
           <button
-            onClick={handleFinalStake}
+            onClick={handleOreStake}
             className="button stake-ore-button"
             disabled={isProcessing}
           >
             {isProcessing ? "Processing..." : "Stake (ORE)"}
+          </button>
+          <button
+            onClick={handleOreUnstake}
+            className="button unstake-ore-button"
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Processing..." : "Unstake (ORE)"}
           </button>
         </div>
         <p className="stake-message-buttons">
