@@ -348,7 +348,7 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
 
   return (
     <div className="staked-balances">
-      <h3 className="large-heading">Staked Balance (Ec1ipse):</h3>
+      <h3 className="large-heading">Staked Balance:</h3>
       <p style={{ fontSize: "0.85em", color: "#888" }}>(Yield earning disabled):</p>
       
       {isFirstLoad && stakedBalances.length === 0 ? (
