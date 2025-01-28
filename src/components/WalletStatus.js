@@ -471,6 +471,7 @@ StakingReward.displayName = "StakingReward";
 
 const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcessing }) => {
   const { publicKey } = useWallet();
+  const [boostStakeInfo, setBoostStakeInfo] = useState([]);
   const [copied, setCopied] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -495,6 +496,18 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcess
     setRefreshCount((prev) => prev + 1);
     setTimeout(() => setIsRefreshing(false), 1000);
   };
+
+  useEffect(() => {
+    if (publicKey && connection) {
+        getBoostStakeInfo(connection, publicKey)
+            .then(results => {
+                setBoostStakeInfo(results);
+            })
+            .catch(error => {
+                console.error('Error fetching boost/stake info:', error);
+            });
+    }
+  }, [publicKey, connection, refreshCount]);
 
   return (
     <div className="wallet-status">
@@ -545,6 +558,7 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcess
             connection={connection}
             onBalanceClick={onBalanceClick}
             refreshCount={refreshCount}
+            boostStakeInfo={boostStakeInfo}
           />
         </>
       ) : (
@@ -557,3 +571,4 @@ const WalletStatus = memo(({ connection, onBalanceClick, onStakeClaim, isProcess
 WalletStatus.displayName = "WalletStatus";
 
 export default memo(WalletStatus);
+export { getBoostStakeInfo };

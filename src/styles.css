@@ -238,36 +238,6 @@
     cursor: not-allowed;
 }
 
-.stake-button.active {
-    background-color: #3f9342;
-    cursor: pointer;
-}
-
-.stake-button.inactive {
-    background-color: #454545;
-    cursor: not-allowed;
-    text-decoration: line-through;
-}
-
-.stake-button-button:hover:not(:disabled) {
-    background-color: #1765b4;
-    cursor: pointer;
-}
-
-.unstake-button {
-    background-color: #b71c1c;
-}
-
-.unstake-button:hover:not(:disabled) {
-    background-color: #9a1414;
-    opacity: 0.85;
-}
-
-.unstake-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
 .connect-wallet-message {
     text-align: center;
     color: #c7a600;
@@ -669,25 +639,6 @@ body::after {
     opacity: 1;
   }
   
-  .lp-links {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.lp-button {
-    background-color: #512929;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 10px;
-}
-
-.lp-button:hover {
-    background-color: #3c1f1f;
-}
 .claim-rewards-section {
     display: flex;
     justify-content: center;
@@ -814,16 +765,6 @@ body::after {
   font-weight: bold;
 }
 
-.stake-button {
-  background-color: #4caf50; /* Green for stake */
-  color: #fff;
-}
-
-.unstake-button {
-  background-color: #f44336; /* Red for unstake */
-  color: #fff;
-}
-
 .button:disabled {
   background-color: #a5d6a7; /* Lighter green when disabled */
   cursor: not-allowed;
@@ -924,13 +865,6 @@ body::after {
     white-space: nowrap; /* Prevents text from wrapping */
   }
   
-  .migrate-button {
-    background-color: #4a90e2;
-    color: white;
-    /* Add other styles to match your design */
-  }
-
-  /* Add these new styles to your existing CSS file */
 
 .stake-message {
     margin: 20px auto;
@@ -1004,52 +938,6 @@ body::after {
   .button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-  
-  /* Eclipse buttons theme */
-  .unstake-button {
-    background: #7e0c0c;
-    color: white;
-    box-shadow: 0 4px 6px rgba(255, 107, 107, 0.2);
-  }
-  
-  .unstake-button:hover:not(:disabled) {
-    background: #FF5252;
-    transform: translateY(-2px);
-  }
-  
-  .migrate-button {
-    background: #4D96FF;
-    color: white;
-    box-shadow: 0 4px 6px rgba(77, 150, 255, 0.2);
-  }
-  
-  .migrate-button:hover:not(:disabled) {
-    background: #3B82F6;
-    transform: translateY(-2px);
-  }
-  
-  /* ORE buttons theme */
-  .stake-ore-button {
-    background: #10B981;
-    color: white;
-    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
-  }
-  
-  .stake-ore-button:hover:not(:disabled) {
-    background: #059669;
-    transform: translateY(-2px);
-  }
-  
-  .unstake-ore-button {
-    background: #8b6f3f;
-    color: white;
-    box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
-  }
-  
-  .unstake-ore-button:hover:not(:disabled) {
-    background: #D97706;
-    transform: translateY(-2px);
   }
   
   .header-rewards,
@@ -1153,4 +1041,73 @@ body::after {
 .wallet-balance-item.disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* Eclipse buttons theme */
+.unstake-button {
+  background: #dc2626; /* Brighter red */
+  color: white;
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+}
+
+.unstake-button:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+.migrate-button {
+  background: #2563eb; /* More saturated blue */
+  color: white;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.migrate-button:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* ORE buttons theme */
+.stake-ore-button {
+  background: #059669; /* Deeper green */
+  color: white;
+  box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2);
+}
+
+.stake-ore-button:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-2px);
+}
+
+.unstake-ore-button {
+  background: #d97706; /* More saturated amber */
+  color: white;
+  box-shadow: 0 4px 6px rgba(217, 119, 6, 0.2);
+}
+
+.unstake-ore-button:hover:not(:disabled) {
+  background: #b45309;
+  transform: translateY(-2px);
+}
+
+/* Claim button styling */
+.claim-button {
+  background: #2d0a31;  /* Deep purple/crimson */
+  color: #ffa6e6;       /* Soft pink glow */
+  box-shadow: 0 4px 12px rgba(234, 51, 147, 0.3);
+  border: 1px solid #8b377a;
+}
+
+.claim-button:hover:not(:disabled) {
+  background: #3d1542;  /* Slightly lighter purple */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(234, 51, 147, 0.4);
+  border-color: #ed3ab7;
+}
+
+.claim-button:disabled {
+  background-color: #1f0f1f;  /* Muted dark purple */
+  cursor: not-allowed;
+  color: #6b6b6b;
+  border-color: #3d2d3d;
+  box-shadow: none;
 }

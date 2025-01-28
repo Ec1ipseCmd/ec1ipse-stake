@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { getBoostStakeInfo } from '../components/WalletStatus';
 import {
   PublicKey,
   Connection,
@@ -18,6 +19,11 @@ import { particlesConfig, initParticles } from './components/particles';
 import { Buffer } from "buffer";
 import Script from "next/script";
 import Image from "next/image";
+import { 
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountInstruction 
+} from '@solana/spl-token';
 import { TOKEN_LIST } from "../components/tokens";
 
 import { toast, ToastContainer } from "react-toastify";
@@ -323,7 +329,6 @@ function AppContent() {
       });
       instructions.push(withdrawInstruction);
 
-      // Check if new stake account exists, if not create it
       const stakeAccount = await connection.getAccountInfo(new_stake_pda);
       if (!stakeAccount) {
         const openInstruction = new TransactionInstruction({
@@ -336,12 +341,11 @@ function AppContent() {
             { pubkey: new_stake_pda, isSigner: false, isWritable: true },
             { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
           ],
-          data: Buffer.from([2]) // Open discriminator
+          data: Buffer.from([2])
         });
         instructions.push(openInstruction);
       }
   
-      // Create deposit instruction
       const depositInstruction = new TransactionInstruction({
         programId: NEW_BOOST_PROGRAM_ID,
         keys: [
@@ -353,7 +357,7 @@ function AppContent() {
           { pubkey: new_stake_pda, isSigner: false, isWritable: true },
           { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
         ],
-        data: Buffer.concat([Buffer.from([1]), amountBuffer]) // Deposit discriminator + amount
+        data: Buffer.concat([Buffer.from([1]), amountBuffer])
       });
       instructions.push(depositInstruction);
   
@@ -371,9 +375,138 @@ function AppContent() {
 
 
 
-
-
-
+  const handleOreClaim = useCallback(async () => {
+    if (!publicKey) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+  
+    try {
+      setIsProcessing(true);
+      
+      // First check if ORE token account exists
+      const ORE_MINT = new PublicKey("oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp");
+      const oreTokenAccount = getAssociatedTokenAddressSync(ORE_MINT, publicKey);
+      const accountInfo = await connection.getAccountInfo(oreTokenAccount);
+  
+      const transaction = new Transaction();
+  
+      // If ORE token account doesn't exist, create it first
+      if (!accountInfo) {
+        console.log("Creating ORE token account");
+        const createTokenAccountIx = createAssociatedTokenAccountInstruction(
+          publicKey,
+          oreTokenAccount,
+          publicKey,
+          ORE_MINT,
+          TOKEN_PROGRAM_ID,
+          ASSOCIATED_TOKEN_PROGRAM_ID
+        );
+        transaction.add(createTokenAccountIx);
+      }
+  
+      // Get stake info and create claim instructions
+      const stakeInfo = await getBoostStakeInfo(connection, publicKey);
+      const tokensWithRewards = stakeInfo.filter(info => info.stake?.rewards > 0);
+      
+      if (tokensWithRewards.length === 0) {
+        toast.error("No rewards available to claim");
+        return;
+      }
+  
+      console.log("Found rewards for tokens:", tokensWithRewards);
+  
+      // Add claim instructions
+      for (const info of tokensWithRewards) {
+        const mint = new PublicKey(info.mint);
+        const rewardsAmount = BigInt(Math.floor(info.stake.rewards * Math.pow(10, 11)));
+        
+        const claimIx = await createClaimInstruction(
+          publicKey,
+          mint,
+          rewardsAmount
+        );
+        
+        transaction.add(claimIx);
+      }
+  
+      console.log("Sending transaction with", transaction.instructions.length, "instructions");
+      
+      const signature = await sendTransaction(transaction, connection);
+      console.log("Transaction sent:", signature);
+      
+      const confirmation = await connection.confirmTransaction(signature, "confirmed");
+      if (confirmation.value.err) {
+        throw new Error(`Transaction failed: ${confirmation.value.err}`);
+      }
+  
+      toast.success("Successfully claimed rewards!");
+    } catch (error) {
+      console.error("Detailed error:", error);
+      if (error.message?.includes("insufficient funds")) {
+        toast.error("Insufficient SOL for transaction");
+      } else {
+        toast.error(`Error claiming rewards: ${error.message || "Unknown error"}`);
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [publicKey, sendTransaction, connection]);
+  
+  const createClaimInstruction = async (signer, mint, amount) => {
+    try {
+      const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
+      const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+      const ORE_MINT = new PublicKey("oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp");
+  
+      // PDAs for boost program
+      const [boost_pda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("boost"), mint.toBuffer()],
+        NEW_BOOST_PROGRAM_ID
+      );
+  
+      const [stake_pda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("stake"), signer.toBuffer(), boost_pda.toBuffer()],
+        NEW_BOOST_PROGRAM_ID
+      );
+  
+      // Get token accounts
+      const beneficiary_token_account = getAssociatedTokenAddressSync(ORE_MINT, signer);
+      const boost_rewards_address = getAssociatedTokenAddressSync(ORE_MINT, boost_pda, true);
+  
+      console.log("Creating claim instruction for:", {
+        programId: NEW_BOOST_PROGRAM_ID.toBase58(),
+        signer: signer.toBase58(),
+        beneficiaryAccount: beneficiary_token_account.toBase58(),
+        boostPda: boost_pda.toBase58(),
+        boostRewards: boost_rewards_address.toBase58(),
+        stakePda: stake_pda.toBase58(),
+        tokenProgram: TOKEN_PROGRAM_ID.toBase58(),
+        amount: amount.toString()
+      });
+  
+      const amountBuffer = Buffer.alloc(8);
+      amountBuffer.writeBigUInt64LE(amount);
+  
+      const instruction = new TransactionInstruction({
+        programId: NEW_BOOST_PROGRAM_ID,
+        keys: [
+          { pubkey: signer, isSigner: true, isWritable: true },
+          { pubkey: beneficiary_token_account, isSigner: false, isWritable: true },
+          { pubkey: boost_pda, isSigner: false, isWritable: false },
+          { pubkey: boost_rewards_address, isSigner: false, isWritable: true },
+          { pubkey: stake_pda, isSigner: false, isWritable: true },
+          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+        ],
+        data: Buffer.concat([Buffer.from([0]), amountBuffer])
+      });
+  
+      return instruction;
+    } catch (error) {
+      console.error("Error in createClaimInstruction:", error);
+      throw error;
+    }
+  };
 
 
 
@@ -977,6 +1110,15 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
             disabled={isProcessing}
           >
             {isProcessing ? "Processing..." : "Unstake (Global)"}
+          </button>
+          </div>
+          <div className="button-group ore-buttons">
+          <button
+            onClick={handleOreClaim}
+            className="button claim-button"
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Processing..." : "Claim All (Global)"}
           </button>
         </div>
         <p className="stake-message-buttons">
