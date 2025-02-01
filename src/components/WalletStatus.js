@@ -73,7 +73,7 @@ const WalletBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
     } else {
       setBalances({});
     }
-  }, [publicKey, connection, isFirstLoad, refreshCount]);
+  }, [publicKey, connection]);
 
   useEffect(() => {
     fetchBalances();
@@ -327,7 +327,7 @@ const StakedBalances = memo(({ publicKey, connection, onBalanceClick, refreshCou
     } catch (error) {
       console.error("Error fetching staked balances:", error);
     }
-  }, [publicKey, mintAddresses, connection, refreshCount, boostStakeInfo]);
+  }, [publicKey, mintAddresses, connection, boostStakeInfo]);
 
   useEffect(() => {
     fetchStakedBalances();
@@ -451,9 +451,6 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
   useEffect(() => {
     fetchStakeReward();
 
-    const intervalId = setInterval(fetchStakeReward, 75000);
-
-    return () => clearInterval(intervalId);
   }, [fetchStakeReward]);
 
   return (

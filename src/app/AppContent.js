@@ -865,9 +865,32 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
       const transaction = new Transaction();
       const staker = publicKey;
       const mint = new PublicKey(mintAddress);
-      const unstakeAmount = BigInt(
-        Math.round(unstakeAmountFloat * 10 ** decimals)
+
+      // Get the full staked balance before unstaking
+      const [boostAddress] = PublicKey.findProgramAddressSync(
+        [Buffer.from("boost"), mint.toBuffer()],
+        new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc")
       );
+      
+      const [stakePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("stake"), publicKey.toBuffer(), boostAddress.toBuffer()],
+        new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc")
+      );
+
+      const stakeAccountInfo = await connection.getAccountInfo(stakePda);
+      if (!stakeAccountInfo) {
+        throw new Error("Stake account not found");
+      }
+
+      // Calculate the actual unstake amount
+      let unstakeAmount = BigInt(Math.round(unstakeAmountFloat * 10 ** decimals));
+      
+      // If trying to unstake full amount, show warning and adjust
+      const currentBalance = BigInt(Math.round(unstakeAmountFloat * 10 ** decimals));
+      if (unstakeAmount >= currentBalance) {
+        toast.info("A small amount will be left in the account for rent-exempt minimum");
+        unstakeAmount = unstakeAmount - BigInt(2000000); // Adjust rent-exempt minimum as needed
+      }
 
       const instruction = await createUnstakeBoostInstruction(
         staker,
@@ -883,11 +906,15 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
       toast.success("Unstake transaction sent successfully!");
     } catch (error) {
       console.error("Error unstaking boost:", error);
-      toast.error("Error confirming unstaking boost. Please review totals for confirmation.");
+      if (error.message?.includes("rent-exempt")) {
+        toast.error("Please leave a small amount for account rent");
+      } else {
+        toast.error("Error confirming unstaking boost. Please review totals for confirmation.");
+      }
     } finally {
       setIsProcessing(false);
     }
-  }, [
+}, [
     publicKey,
     sendTransaction,
     amount,
@@ -895,89 +922,103 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
     decimals,
     miner,
     connection,
-  ]);
+]);
 
-  const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
-    try {
-      const programId = new PublicKey(
-        "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
-      );
-      const boostProgramId = new PublicKey(
-        "boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc"
-      );
+const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
+  try {
+    const programId = new PublicKey(
+      "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
+    );
+    const boostProgramId = new PublicKey(
+      "boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc"
+    );
 
-      const TOKEN_PROGRAM_ID = getTokenProgramId();
-      const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey(
-        "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-      );
+    const TOKEN_PROGRAM_ID = getTokenProgramId();
+    const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey(
+      "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+    );
 
-      const managed_proof_address = PublicKey.findProgramAddressSync(
-        [Buffer.from("managed-proof-account"), miner.toBuffer()],
-        programId
-      )[0];
+    // Get the current stake account info
+    const [boostPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("boost"), mint.toBuffer()],
+      boostProgramId
+    );
 
-      const delegated_boost_address = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("v2-delegated-boost"),
-          staker.toBuffer(),
-          mint.toBuffer(),
-          managed_proof_address.toBuffer(),
-        ],
-        programId
-      )[0];
+    const managed_proof_address = PublicKey.findProgramAddressSync(
+      [Buffer.from("managed-proof-account"), miner.toBuffer()],
+      programId
+    )[0];
 
-      const boost_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        boostProgramId
-      )[0];
+    const delegated_boost_address = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("v2-delegated-boost"),
+        staker.toBuffer(),
+        mint.toBuffer(),
+        managed_proof_address.toBuffer(),
+      ],
+      programId
+    )[0];
 
-      const stake_pda = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("stake"),
-          managed_proof_address.toBuffer(),
-          boost_pda.toBuffer(),
-        ],
-        boostProgramId
-      )[0];
+    const boost_pda = PublicKey.findProgramAddressSync(
+      [Buffer.from("boost"), mint.toBuffer()],
+      boostProgramId
+    )[0];
 
-      const managed_proof_token_account = getAssociatedTokenAddressSync(
-        mint,
-        managed_proof_address,
-        true
-      );
-      const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
-      const boost_tokens_address = getAssociatedTokenAddressSync(
-        mint,
-        boost_pda,
-        true
-      );
-      const amountBuffer = Buffer.alloc(8);
-      amountBuffer.writeBigUInt64LE(amount);
+    const stake_pda = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("stake"),
+        managed_proof_address.toBuffer(),
+        boost_pda.toBuffer(),
+      ],
+      boostProgramId
+    )[0];
 
-      const instruction = new TransactionInstruction({
-        keys: [
-          { pubkey: staker, isSigner: true, isWritable: true },
-          { pubkey: miner, isSigner: false, isWritable: false },
-          { pubkey: managed_proof_address, isSigner: false, isWritable: true },
-          { pubkey: managed_proof_token_account,isSigner: false,isWritable: true },
-          { pubkey: delegated_boost_address,isSigner: false,isWritable: true },
-          { pubkey: boost_pda, isSigner: false, isWritable: true },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: staker_token_account, isSigner: false, isWritable: true },
-          { pubkey: boost_tokens_address, isSigner: false, isWritable: true },
-          { pubkey: stake_pda, isSigner: false, isWritable: true },
-          { pubkey: boostProgramId, isSigner: false, isWritable: false },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-        ],
-        programId: programId,
-        data: Buffer.concat([Buffer.from([10]), amountBuffer]),
-      });
+    const managed_proof_token_account = getAssociatedTokenAddressSync(
+      mint,
+      managed_proof_address,
+      true
+    );
+    const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
+    const boost_tokens_address = getAssociatedTokenAddressSync(
+      mint,
+      boost_pda,
+      true
+    );
 
-      return instruction;
-    } catch (error) {
-      throw error;
+    // Check if amount needs adjustment for rent-exempt minimum
+    const stakeAccountInfo = await connection.getAccountInfo(stake_pda);
+    if (!stakeAccountInfo) {
+      throw new Error("Stake account not found");
     }
-  };
+
+    // Create amount buffer with potentially adjusted amount
+    const amountBuffer = Buffer.alloc(8);
+    amountBuffer.writeBigUInt64LE(amount);
+
+    const instruction = new TransactionInstruction({
+      keys: [
+        { pubkey: staker, isSigner: true, isWritable: true },
+        { pubkey: miner, isSigner: false, isWritable: false },
+        { pubkey: managed_proof_address, isSigner: false, isWritable: true },
+        { pubkey: managed_proof_token_account, isSigner: false, isWritable: true },
+        { pubkey: delegated_boost_address, isSigner: false, isWritable: true },
+        { pubkey: boost_pda, isSigner: false, isWritable: true },
+        { pubkey: mint, isSigner: false, isWritable: false },
+        { pubkey: staker_token_account, isSigner: false, isWritable: true },
+        { pubkey: boost_tokens_address, isSigner: false, isWritable: true },
+        { pubkey: stake_pda, isSigner: false, isWritable: true },
+        { pubkey: boostProgramId, isSigner: false, isWritable: false },
+        { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      ],
+      programId: programId,
+      data: Buffer.concat([Buffer.from([10]), amountBuffer]),
+    });
+
+    return instruction;
+  } catch (error) {
+    throw error;
+  }
+};
 
   const formatBalanceApp = (balance) => {
     const num = Number(balance);
