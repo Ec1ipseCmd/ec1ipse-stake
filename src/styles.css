@@ -1111,3 +1111,23 @@ body::after {
   border-color: #3d2d3d;
   box-shadow: none;
 }
+
+/* Ore.Supply button styling */
+.ore-supply-button {
+  background: #3a0ca3;  /* Deep purple */
+  color: white;
+  box-shadow: 0 4px 12px rgba(58, 12, 163, 0.3);
+  border: 1px solid #4361ee;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+}
+
+.ore-supply-button:hover {
+  background: #4c1d95;  /* Lighter purple on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(58, 12, 163, 0.4);
+  border-color: #4895ef;
+  color: white;
+  text-decoration: none;
+}

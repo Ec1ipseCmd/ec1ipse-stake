@@ -980,7 +980,7 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
     );
     const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
     const boost_tokens_address = getAssociatedTokenAddressSync(
-      mint,
+      mint, 
       boost_pda,
       true
     );
@@ -1090,7 +1090,7 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
   </div>
   <div className="card">
     <p className="stake-message">
-      Stake Boost is no longer available. To continue earning staking rewards, please utilize the buttons below!
+      Staking is no longer able through Mining Pools. Please use <a href="https://beta.ore.supply/" target="_blank" rel="noopener noreferrer">Beta.Ore.Supply</a> for all your staking needs!
     </p>
     <div className="input-group">
       <input
@@ -1119,61 +1119,75 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
       </select>
     </div>
     {publicKey ? (
-      <div className="button-container">
-        <div className="button-group eclipse-buttons">
-          <button
-            onClick={handleUnstakeBoost}
-            className="button unstake-button"
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Unstake (Ec1ipse)"}
-          </button>
-          <button
-            onClick={handleMigration}
-            className="button migrate-button"
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Migrate"}
-          </button>
-        </div>
-        
-        <div className="button-group ore-buttons">
-          <button
-            onClick={handleOreStake}
-            className="button stake-ore-button"
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Stake (Global)"}
-          </button>
-          <button
-            onClick={handleOreUnstake}
-            className="button unstake-ore-button"
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Unstake (Global)"}
-          </button>
-          </div>
-          <div className="button-group ore-buttons">
-          <button
-            onClick={handleOreClaim}
-            className="button claim-button"
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Claim All (Global)"}
-          </button>
-        </div>
-        <p className="stake-message-buttons">
-          Unstake (Ec1ipse) unstakes your selected tokens from Ec1ipse.<br />
-          Migrate allows you to move your staked funds from Ec1ipse to Global Stake.<br />
-          Stake (Global) allows you to stake your tokens with the Global Stake Program.<br />
-          Unstake (Global) allows you to unstake your tokens from the Global Stake Program.
-        </p>
-      </div>
-    ) : (
-      <p className="connect-wallet-message">
-        Please connect your wallet to unstake.
-      </p>
-    )}
+  <div className="button-container">
+    <div className="button-group eclipse-buttons">
+      <button
+        onClick={handleUnstakeBoost}
+        className="button unstake-button"
+        disabled={isProcessing}
+      >
+        {isProcessing ? "Processing..." : "Unstake (Ec1ipse)"}
+      </button>
+      {/* 
+      <button
+        onClick={handleMigration}
+        className="button migrate-button"
+        disabled={isProcessing}
+      >
+        {isProcessing ? "Processing..." : "Migrate"}
+      </button>
+      */}
+    </div>
+    
+    {/* 
+    <div className="button-group ore-buttons">
+      <button
+        onClick={handleOreStake}
+        className="button stake-ore-button"
+        disabled={isProcessing}
+      >
+        {isProcessing ? "Processing..." : "Stake (Global)"}
+      </button>
+      <button
+        onClick={handleOreUnstake}
+        className="button unstake-ore-button"
+        disabled={isProcessing}
+      >
+        {isProcessing ? "Processing..." : "Unstake (Global)"}
+      </button>
+    </div>
+    <div className="button-group ore-buttons">
+      <button
+        onClick={handleOreClaim}
+        className="button claim-button"
+        disabled={isProcessing}
+      >
+        {isProcessing ? "Processing..." : "Claim All (Global)"}
+      </button>
+    </div>
+    */}
+    
+    <div className="button-group ore-buttons">
+      <a 
+        href="https://beta.ore.supply/" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="button ore-supply-button"
+      >
+        Beta.Ore.Supply
+      </a>
+    </div>
+    
+    <p className="stake-message-buttons">
+      Unstake (Ec1ipse) unstakes your selected tokens from Ec1ipse.<br />
+      Visit Ore.Supply for all your Global Staking needs.
+    </p>
+  </div>
+) : (
+  <p className="connect-wallet-message">
+    Please connect your wallet to unstake.
+  </p>
+)}
   </div>
 </div>
 <ToastContainer
