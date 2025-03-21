@@ -458,7 +458,7 @@ const StakingReward = memo(({ publicKey, refreshCount }) => {
       <h3 className="large-heading-important">Ec1ipse Staking Reward</h3>
       <p className="stake-reward-balance">{stakeReward}</p>
       <p className="notice-text" style={{ fontSize: "0.75em", opacity: 0.5 }}>
-        A minimum of 0.05 ORE is required to claim each specific stake reward account.
+        A minimum of 0.00000005 ORE is required to claim each specific stake reward account.
       </p>
     </div>
   );

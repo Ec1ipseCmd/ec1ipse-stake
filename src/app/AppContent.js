@@ -115,7 +115,7 @@ function AppContent() {
     [miner]
   );
 
-  const MIN_BALANCE = 5_000_000_000;
+  const MIN_BALANCE = 5000;
 
   const handleStakeClaim = useCallback(async () => {
     if (!publicKey) {
@@ -1076,9 +1076,13 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
     >
       Ec1ipse Stats
     </a>
-  </nav>
+    </nav>
 
-  <div className="balances-section">
+<div className="warning-banner">
+  <h1 className="warning-text">Ec1ipse Staking Website will no longer function after 4/20/2025. Please claim all staked balances now.</h1>
+</div>
+
+<div className="balances-section">
     <WalletStatus
       connection={connection}
       onBalanceClick={handleBalanceClick}

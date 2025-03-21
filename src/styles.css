@@ -1131,3 +1131,37 @@ body::after {
   color: white;
   text-decoration: none;
 }
+
+.warning-banner {
+  background-color: #FFDA00;
+  color: #000000;
+  padding: 16px;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  border-radius: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
+}
+
+.warning-text {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .warning-text {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .warning-text {
+    font-size: 16px;
+  }
+}
