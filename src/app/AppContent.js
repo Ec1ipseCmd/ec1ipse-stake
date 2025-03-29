@@ -1079,7 +1079,7 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
     </nav>
 
 <div className="warning-banner">
-  <h1 className="warning-text">Ec1ipse Staking will be decommissioned after 4/20/2025.<br/>Please claim all staked balances now.
+  <h1 className="warning-text">Ec1ipse Staking will be decommissioned after 3/31/2025.<br/>Please claim all staked balances now.
   </h1>
 </div>
 
