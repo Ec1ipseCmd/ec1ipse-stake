@@ -869,12 +869,12 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
       // Get the full staked balance before unstaking
       const [boostAddress] = PublicKey.findProgramAddressSync(
         [Buffer.from("boost"), mint.toBuffer()],
-        new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc")
+        new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
       );
       
       const [stakePda] = PublicKey.findProgramAddressSync(
         [Buffer.from("stake"), publicKey.toBuffer(), boostAddress.toBuffer()],
-        new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc")
+        new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
       );
 
       const stakeAccountInfo = await connection.getAccountInfo(stakePda);
@@ -1025,7 +1025,7 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
     // Check if amount needs adjustment for rent-exempt minimum
     const stakeAccountInfo = await connection.getAccountInfo(stake_pda);
     if (!stakeAccountInfo) {
-      throw new Error("Stake account not found");
+      throw new Error("Stake account not found - Minimum");
     }
 
     // Create amount buffer with potentially adjusted amount
