@@ -243,131 +243,129 @@ function AppContent() {
 
 
 
-  const createMigrationInstruction = async (staker, miner, mint, amount) => {
-    try {
-      const DELEGATION_PROGRAM_ID = new PublicKey("J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we");
-      const OLD_BOOST_PROGRAM_ID = new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc");
-      const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
-      const TOKEN_PROGRAM_ID = getTokenProgramId();
+  // const createMigrationInstruction = async (staker, miner, mint, amount) => {
+  //   try {
+  //     const DELEGATION_PROGRAM_ID = new PublicKey("J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we");
+  //     const OLD_BOOST_PROGRAM_ID = new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc");
+  //     const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
+  //     const TOKEN_PROGRAM_ID = getTokenProgramId();
   
-      // PDAs for managed proof and delegated boost
-      const managed_proof_address = PublicKey.findProgramAddressSync(
-        [Buffer.from("managed-proof-account"), miner.toBuffer()],
-        DELEGATION_PROGRAM_ID
-      )[0];
+  //     // PDAs for managed proof and delegated boost
+  //     const managed_proof_address = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("managed-proof-account"), miner.toBuffer()],
+  //       DELEGATION_PROGRAM_ID
+  //     )[0];
   
-      const delegated_boost_address = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("v2-delegated-boost"),
-          staker.toBuffer(),
-          mint.toBuffer(),
-          managed_proof_address.toBuffer(),
-        ],
-        DELEGATION_PROGRAM_ID
-      )[0];
+  //     const delegated_boost_address = PublicKey.findProgramAddressSync(
+  //       [
+  //         Buffer.from("v2-delegated-boost"),
+  //         staker.toBuffer(),
+  //         mint.toBuffer(),
+  //         managed_proof_address.toBuffer(),
+  //       ],
+  //       DELEGATION_PROGRAM_ID
+  //     )[0];
   
-      // PDAs for old boost program
-      const old_boost_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        OLD_BOOST_PROGRAM_ID
-      )[0];
+  //     // PDAs for old boost program
+  //     const old_boost_pda = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("boost"), mint.toBuffer()],
+  //       OLD_BOOST_PROGRAM_ID
+  //     )[0];
   
-      const old_stake_pda = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("stake"),
-          managed_proof_address.toBuffer(), 
-          old_boost_pda.toBuffer()
-        ],
-        OLD_BOOST_PROGRAM_ID
-      )[0];
+  //     const old_stake_pda = PublicKey.findProgramAddressSync(
+  //       [
+  //         Buffer.from("stake"),
+  //         managed_proof_address.toBuffer(), 
+  //         old_boost_pda.toBuffer()
+  //       ],
+  //       OLD_BOOST_PROGRAM_ID
+  //     )[0];
   
-      // PDAs for new boost program
-      const new_boost_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      )[0];
+  //     // PDAs for new boost program
+  //     const new_boost_pda = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("boost"), mint.toBuffer()],
+  //       NEW_BOOST_PROGRAM_ID
+  //     )[0];
   
-      const new_stake_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("stake"), staker.toBuffer(), new_boost_pda.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      )[0];
+  //     const new_stake_pda = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("stake"), staker.toBuffer(), new_boost_pda.toBuffer()],
+  //       NEW_BOOST_PROGRAM_ID
+  //     )[0];
   
-      // Get token accounts
-      const managed_proof_token_account = getAssociatedTokenAddressSync(
-        mint,
-        managed_proof_address,
-        true
-      );
-      const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
-      const old_boost_tokens_address = getAssociatedTokenAddressSync(mint, old_boost_pda, true);
-      const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
+  //     // Get token accounts
+  //     const managed_proof_token_account = getAssociatedTokenAddressSync(
+  //       mint,
+  //       managed_proof_address,
+  //       true
+  //     );
+  //     const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
+  //     const old_boost_tokens_address = getAssociatedTokenAddressSync(mint, old_boost_pda, true);
+  //     const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
   
-      // Create amount buffer
-      const amountBuffer = Buffer.alloc(8);
-      amountBuffer.writeBigUInt64LE(amount);
+  //     // Create amount buffer
+  //     const amountBuffer = Buffer.alloc(8);
+  //     amountBuffer.writeBigUInt64LE(amount);
   
-      let instructions = [];
+  //     let instructions = [];
 
-      // Create withdraw instruction
-      const withdrawInstruction = new TransactionInstruction({
-        programId: DELEGATION_PROGRAM_ID,
-        keys: [
-          { pubkey: staker, isSigner: true, isWritable: true },
-          { pubkey: miner, isSigner: false, isWritable: false },
-          { pubkey: managed_proof_address, isSigner: false, isWritable: true },
-          { pubkey: managed_proof_token_account, isSigner: false, isWritable: true },
-          { pubkey: delegated_boost_address, isSigner: false, isWritable: true },
-          { pubkey: old_boost_pda, isSigner: false, isWritable: true },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: staker_token_account, isSigner: false, isWritable: true },
-          { pubkey: old_boost_tokens_address, isSigner: false, isWritable: true },
-          { pubkey: old_stake_pda, isSigner: false, isWritable: true },
-          { pubkey: OLD_BOOST_PROGRAM_ID, isSigner: false, isWritable: false },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-        ],
-        data: Buffer.concat([Buffer.from([10]), amountBuffer])
-      });
-      instructions.push(withdrawInstruction);
+  //     // Create withdraw instruction
+  //     const withdrawInstruction = new TransactionInstruction({
+  //       programId: DELEGATION_PROGRAM_ID,
+  //       keys: [
+  //         { pubkey: staker, isSigner: true, isWritable: true },
+  //         { pubkey: miner, isSigner: false, isWritable: false },
+  //         { pubkey: managed_proof_address, isSigner: false, isWritable: true },
+  //         { pubkey: managed_proof_token_account, isSigner: false, isWritable: true },
+  //         { pubkey: delegated_boost_address, isSigner: false, isWritable: true },
+  //         { pubkey: old_boost_pda, isSigner: false, isWritable: true },
+  //         { pubkey: mint, isSigner: false, isWritable: false },
+  //         { pubkey: staker_token_account, isSigner: false, isWritable: true },
+  //         { pubkey: old_boost_tokens_address, isSigner: false, isWritable: true },
+  //         { pubkey: old_stake_pda, isSigner: false, isWritable: true },
+  //         { pubkey: OLD_BOOST_PROGRAM_ID, isSigner: false, isWritable: false },
+  //         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+  //       ],
+  //       data: Buffer.concat([Buffer.from([10]), amountBuffer])
+  //     });
+  //     instructions.push(withdrawInstruction);
 
-      const stakeAccount = await connection.getAccountInfo(new_stake_pda);
-      if (!stakeAccount) {
-        const openInstruction = new TransactionInstruction({
-          programId: NEW_BOOST_PROGRAM_ID,
-          keys: [
-            { pubkey: staker, isSigner: true, isWritable: true },
-            { pubkey: staker, isSigner: true, isWritable: true }, // payer
-            { pubkey: new_boost_pda, isSigner: false, isWritable: true },
-            { pubkey: mint, isSigner: false, isWritable: false },
-            { pubkey: new_stake_pda, isSigner: false, isWritable: true },
-            { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-          ],
-          data: Buffer.from([2])
-        });
-        instructions.push(openInstruction);
-      }
+  //     const stakeAccount = await connection.getAccountInfo(new_stake_pda);
+  //     if (!stakeAccount) {
+  //       const openInstruction = new TransactionInstruction({
+  //         programId: NEW_BOOST_PROGRAM_ID,
+  //         keys: [
+  //           { pubkey: staker, isSigner: true, isWritable: true },
+  //           { pubkey: staker, isSigner: true, isWritable: true }, // payer
+  //           { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+  //           { pubkey: mint, isSigner: false, isWritable: false },
+  //           { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+  //           { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+  //         ],
+  //         data: Buffer.from([2])
+  //       });
+  //       instructions.push(openInstruction);
+  //     }
   
-      const depositInstruction = new TransactionInstruction({
-        programId: NEW_BOOST_PROGRAM_ID,
-        keys: [
-          { pubkey: staker, isSigner: true, isWritable: true },
-          { pubkey: new_boost_pda, isSigner: false, isWritable: true },
-          { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: staker_token_account, isSigner: false, isWritable: true },
-          { pubkey: new_stake_pda, isSigner: false, isWritable: true },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-        ],
-        data: Buffer.concat([Buffer.from([1]), amountBuffer])
-      });
-      instructions.push(depositInstruction);
+  //     const depositInstruction = new TransactionInstruction({
+  //       programId: NEW_BOOST_PROGRAM_ID,
+  //       keys: [
+  //         { pubkey: staker, isSigner: true, isWritable: true },
+  //         { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+  //         { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
+  //         { pubkey: mint, isSigner: false, isWritable: false },
+  //         { pubkey: staker_token_account, isSigner: false, isWritable: true },
+  //         { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+  //         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+  //       ],
+  //       data: Buffer.concat([Buffer.from([1]), amountBuffer])
+  //     });
+  //     instructions.push(depositInstruction);
   
-      return instructions;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-
+  //     return instructions;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // };
 
 
 
@@ -375,138 +373,140 @@ function AppContent() {
 
 
 
-  const handleOreClaim = useCallback(async () => {
-    if (!publicKey) {
-      toast.error("Please connect your wallet");
-      return;
-    }
+
+
+  // const handleOreClaim = useCallback(async () => {
+  //   if (!publicKey) {
+  //     toast.error("Please connect your wallet");
+  //     return;
+  //   }
   
-    try {
-      setIsProcessing(true);
+  //   try {
+  //     setIsProcessing(true);
       
-      // First check if ORE token account exists
-      const ORE_MINT = new PublicKey("oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp");
-      const oreTokenAccount = getAssociatedTokenAddressSync(ORE_MINT, publicKey);
-      const accountInfo = await connection.getAccountInfo(oreTokenAccount);
+  //     // First check if ORE token account exists
+  //     const ORE_MINT = new PublicKey("oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp");
+  //     const oreTokenAccount = getAssociatedTokenAddressSync(ORE_MINT, publicKey);
+  //     const accountInfo = await connection.getAccountInfo(oreTokenAccount);
   
-      const transaction = new Transaction();
+  //     const transaction = new Transaction();
   
-      // If ORE token account doesn't exist, create it first
-      if (!accountInfo) {
-        console.log("Creating ORE token account");
-        const createTokenAccountIx = createAssociatedTokenAccountInstruction(
-          publicKey,
-          oreTokenAccount,
-          publicKey,
-          ORE_MINT,
-          TOKEN_PROGRAM_ID,
-          ASSOCIATED_TOKEN_PROGRAM_ID
-        );
-        transaction.add(createTokenAccountIx);
-      }
+  //     // If ORE token account doesn't exist, create it first
+  //     if (!accountInfo) {
+  //       console.log("Creating ORE token account");
+  //       const createTokenAccountIx = createAssociatedTokenAccountInstruction(
+  //         publicKey,
+  //         oreTokenAccount,
+  //         publicKey,
+  //         ORE_MINT,
+  //         TOKEN_PROGRAM_ID,
+  //         ASSOCIATED_TOKEN_PROGRAM_ID
+  //       );
+  //       transaction.add(createTokenAccountIx);
+  //     }
   
-      // Get stake info and create claim instructions
-      const stakeInfo = await getBoostStakeInfo(connection, publicKey);
-      const tokensWithRewards = stakeInfo.filter(info => info.stake?.rewards > 0);
+  //     // Get stake info and create claim instructions
+  //     const stakeInfo = await getBoostStakeInfo(connection, publicKey);
+  //     const tokensWithRewards = stakeInfo.filter(info => info.stake?.rewards > 0);
       
-      if (tokensWithRewards.length === 0) {
-        toast.error("No rewards available to claim");
-        return;
-      }
+  //     if (tokensWithRewards.length === 0) {
+  //       toast.error("No rewards available to claim");
+  //       return;
+  //     }
   
-      console.log("Found rewards for tokens:", tokensWithRewards);
+  //     console.log("Found rewards for tokens:", tokensWithRewards);
   
-      // Add claim instructions
-      for (const info of tokensWithRewards) {
-        const mint = new PublicKey(info.mint);
-        const rewardsAmount = BigInt(Math.floor(info.stake.rewards * Math.pow(10, 11)));
+  //     // Add claim instructions
+  //     for (const info of tokensWithRewards) {
+  //       const mint = new PublicKey(info.mint);
+  //       const rewardsAmount = BigInt(Math.floor(info.stake.rewards * Math.pow(10, 11)));
         
-        const claimIx = await createClaimInstruction(
-          publicKey,
-          mint,
-          rewardsAmount
-        );
+  //       const claimIx = await createClaimInstruction(
+  //         publicKey,
+  //         mint,
+  //         rewardsAmount
+  //       );
         
-        transaction.add(claimIx);
-      }
+  //       transaction.add(claimIx);
+  //     }
   
-      console.log("Sending transaction with", transaction.instructions.length, "instructions");
+  //     console.log("Sending transaction with", transaction.instructions.length, "instructions");
       
-      const signature = await sendTransaction(transaction, connection);
-      console.log("Transaction sent:", signature);
+  //     const signature = await sendTransaction(transaction, connection);
+  //     console.log("Transaction sent:", signature);
       
-      const confirmation = await connection.confirmTransaction(signature, "confirmed");
-      if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${confirmation.value.err}`);
-      }
+  //     const confirmation = await connection.confirmTransaction(signature, "confirmed");
+  //     if (confirmation.value.err) {
+  //       throw new Error(`Transaction failed: ${confirmation.value.err}`);
+  //     }
   
-      toast.success("Successfully claimed rewards!");
-    } catch (error) {
-      console.error("Detailed error:", error);
-      if (error.message?.includes("insufficient funds")) {
-        toast.error("Insufficient SOL for transaction");
-      } else {
-        toast.error(`Error claiming rewards: ${error.message || "Unknown error"}`);
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [publicKey, sendTransaction, connection]);
+  //     toast.success("Successfully claimed rewards!");
+  //   } catch (error) {
+  //     console.error("Detailed error:", error);
+  //     if (error.message?.includes("insufficient funds")) {
+  //       toast.error("Insufficient SOL for transaction");
+  //     } else {
+  //       toast.error(`Error claiming rewards: ${error.message || "Unknown error"}`);
+  //     }
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // }, [publicKey, sendTransaction, connection]);
   
-  const createClaimInstruction = async (signer, mint, amount) => {
-    try {
-      const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
-      const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-      const ORE_MINT = new PublicKey("oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp");
+  // const createClaimInstruction = async (signer, mint, amount) => {
+  //   try {
+  //     const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
+  //     const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+  //     const ORE_MINT = new PublicKey("oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp");
   
-      // PDAs for boost program
-      const [boost_pda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      );
+  //     // PDAs for boost program
+  //     const [boost_pda] = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("boost"), mint.toBuffer()],
+  //       NEW_BOOST_PROGRAM_ID
+  //     );
   
-      const [stake_pda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("stake"), signer.toBuffer(), boost_pda.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      );
+  //     const [stake_pda] = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("stake"), signer.toBuffer(), boost_pda.toBuffer()],
+  //       NEW_BOOST_PROGRAM_ID
+  //     );
   
-      // Get token accounts
-      const beneficiary_token_account = getAssociatedTokenAddressSync(ORE_MINT, signer);
-      const boost_rewards_address = getAssociatedTokenAddressSync(ORE_MINT, boost_pda, true);
+  //     // Get token accounts
+  //     const beneficiary_token_account = getAssociatedTokenAddressSync(ORE_MINT, signer);
+  //     const boost_rewards_address = getAssociatedTokenAddressSync(ORE_MINT, boost_pda, true);
   
-      console.log("Creating claim instruction for:", {
-        programId: NEW_BOOST_PROGRAM_ID.toBase58(),
-        signer: signer.toBase58(),
-        beneficiaryAccount: beneficiary_token_account.toBase58(),
-        boostPda: boost_pda.toBase58(),
-        boostRewards: boost_rewards_address.toBase58(),
-        stakePda: stake_pda.toBase58(),
-        tokenProgram: TOKEN_PROGRAM_ID.toBase58(),
-        amount: amount.toString()
-      });
+  //     console.log("Creating claim instruction for:", {
+  //       programId: NEW_BOOST_PROGRAM_ID.toBase58(),
+  //       signer: signer.toBase58(),
+  //       beneficiaryAccount: beneficiary_token_account.toBase58(),
+  //       boostPda: boost_pda.toBase58(),
+  //       boostRewards: boost_rewards_address.toBase58(),
+  //       stakePda: stake_pda.toBase58(),
+  //       tokenProgram: TOKEN_PROGRAM_ID.toBase58(),
+  //       amount: amount.toString()
+  //     });
   
-      const amountBuffer = Buffer.alloc(8);
-      amountBuffer.writeBigUInt64LE(amount);
+  //     const amountBuffer = Buffer.alloc(8);
+  //     amountBuffer.writeBigUInt64LE(amount);
   
-      const instruction = new TransactionInstruction({
-        programId: NEW_BOOST_PROGRAM_ID,
-        keys: [
-          { pubkey: signer, isSigner: true, isWritable: true },
-          { pubkey: beneficiary_token_account, isSigner: false, isWritable: true },
-          { pubkey: boost_pda, isSigner: false, isWritable: false },
-          { pubkey: boost_rewards_address, isSigner: false, isWritable: true },
-          { pubkey: stake_pda, isSigner: false, isWritable: true },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
-        ],
-        data: Buffer.concat([Buffer.from([0]), amountBuffer])
-      });
+  //     const instruction = new TransactionInstruction({
+  //       programId: NEW_BOOST_PROGRAM_ID,
+  //       keys: [
+  //         { pubkey: signer, isSigner: true, isWritable: true },
+  //         { pubkey: beneficiary_token_account, isSigner: false, isWritable: true },
+  //         { pubkey: boost_pda, isSigner: false, isWritable: false },
+  //         { pubkey: boost_rewards_address, isSigner: false, isWritable: true },
+  //         { pubkey: stake_pda, isSigner: false, isWritable: true },
+  //         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+  //       ],
+  //       data: Buffer.concat([Buffer.from([0]), amountBuffer])
+  //     });
   
-      return instruction;
-    } catch (error) {
-      console.error("Error in createClaimInstruction:", error);
-      throw error;
-    }
-  };
+  //     return instruction;
+  //   } catch (error) {
+  //     console.error("Error in createClaimInstruction:", error);
+  //     throw error;
+  //   }
+  // };
 
 
 
@@ -516,217 +516,217 @@ function AppContent() {
 
 
 
-  const handleOreStake = useCallback(async () => {
-    if (!publicKey) {
-      toast.error("Please connect your wallet");
-      return;
-    }
+  // const handleOreStake = useCallback(async () => {
+  //   if (!publicKey) {
+  //     toast.error("Please connect your wallet");
+  //     return;
+  //   }
   
-    const stakeAmountFloat = parseFloat(amount);
-    if (isNaN(stakeAmountFloat) || stakeAmountFloat <= 0) {
-      toast.error("Please enter a valid amount to stake.");
-      return;
-    }
+  //   const stakeAmountFloat = parseFloat(amount);
+  //   if (isNaN(stakeAmountFloat) || stakeAmountFloat <= 0) {
+  //     toast.error("Please enter a valid amount to stake.");
+  //     return;
+  //   }
   
-    try {
-      setIsProcessing(true);
-      const transaction = new Transaction();
-      const staker = publicKey;
-      const mint = new PublicKey(mintAddress);
-      const stakeAmount = BigInt(
-        Math.round(stakeAmountFloat * 10 ** decimals)
-      );
+  //   try {
+  //     setIsProcessing(true);
+  //     const transaction = new Transaction();
+  //     const staker = publicKey;
+  //     const mint = new PublicKey(mintAddress);
+  //     const stakeAmount = BigInt(
+  //       Math.round(stakeAmountFloat * 10 ** decimals)
+  //     );
   
-      const instructions = await createOreStakeInstruction(
-        staker,
-        mint,
-        stakeAmount
-      );
+  //     const instructions = await createOreStakeInstruction(
+  //       staker,
+  //       mint,
+  //       stakeAmount
+  //     );
       
-      instructions.forEach(instruction => transaction.add(instruction));
-      const signature = await sendTransaction(transaction, connection);
-      await connection.confirmTransaction(signature, "confirmed");
+  //     instructions.forEach(instruction => transaction.add(instruction));
+  //     const signature = await sendTransaction(transaction, connection);
+  //     await connection.confirmTransaction(signature, "confirmed");
 
-      toast.success("Stake transaction sent successfully!");
-    } catch (error) {
-      console.error("Error during staking:", error);
-      toast.error("Error during staking. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [
-    publicKey,
-    sendTransaction,
-    amount,
-    mintAddress,
-    decimals,
-    connection
-  ]);
+  //     toast.success("Stake transaction sent successfully!");
+  //   } catch (error) {
+  //     console.error("Error during staking:", error);
+  //     toast.error("Error during staking. Please try again.");
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // }, [
+  //   publicKey,
+  //   sendTransaction,
+  //   amount,
+  //   mintAddress,
+  //   decimals,
+  //   connection
+  // ]);
 
 
 
-  const createOreStakeInstruction = async (staker, mint, amount) => {
-    try {
-      const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
-      const TOKEN_PROGRAM_ID = getTokenProgramId();
+  // const createOreStakeInstruction = async (staker, mint, amount) => {
+  //   try {
+  //     const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
+  //     const TOKEN_PROGRAM_ID = getTokenProgramId();
   
-      // PDAs for new boost program
-      const new_boost_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      )[0];
+  //     // PDAs for new boost program
+  //     const new_boost_pda = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("boost"), mint.toBuffer()],
+  //       NEW_BOOST_PROGRAM_ID
+  //     )[0];
   
-      const new_stake_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("stake"), staker.toBuffer(), new_boost_pda.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      )[0];
+  //     const new_stake_pda = PublicKey.findProgramAddressSync(
+  //       [Buffer.from("stake"), staker.toBuffer(), new_boost_pda.toBuffer()],
+  //       NEW_BOOST_PROGRAM_ID
+  //     )[0];
   
-      // Get token accounts
-      const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
-      const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
+  //     // Get token accounts
+  //     const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
+  //     const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
   
-      // Create amount buffer
-      const amountBuffer = Buffer.alloc(8);
-      amountBuffer.writeBigUInt64LE(amount);
+  //     // Create amount buffer
+  //     const amountBuffer = Buffer.alloc(8);
+  //     amountBuffer.writeBigUInt64LE(amount);
   
-      let instructions = [];
+  //     let instructions = [];
 
-      // Check if stake account exists, if not create it
-      const stakeAccount = await connection.getAccountInfo(new_stake_pda);
-      if (!stakeAccount) {
-        const openInstruction = new TransactionInstruction({
-          programId: NEW_BOOST_PROGRAM_ID,
-          keys: [
-            { pubkey: staker, isSigner: true, isWritable: true },
-            { pubkey: staker, isSigner: true, isWritable: true }, // payer
-            { pubkey: new_boost_pda, isSigner: false, isWritable: true },
-            { pubkey: mint, isSigner: false, isWritable: false },
-            { pubkey: new_stake_pda, isSigner: false, isWritable: true },
-            { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-          ],
-          data: Buffer.from([2]) // Open discriminator
-        });
-        instructions.push(openInstruction);
-      }
+  //     // Check if stake account exists, if not create it
+  //     const stakeAccount = await connection.getAccountInfo(new_stake_pda);
+  //     if (!stakeAccount) {
+  //       const openInstruction = new TransactionInstruction({
+  //         programId: NEW_BOOST_PROGRAM_ID,
+  //         keys: [
+  //           { pubkey: staker, isSigner: true, isWritable: true },
+  //           { pubkey: staker, isSigner: true, isWritable: true }, // payer
+  //           { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+  //           { pubkey: mint, isSigner: false, isWritable: false },
+  //           { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+  //           { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+  //         ],
+  //         data: Buffer.from([2]) // Open discriminator
+  //       });
+  //       instructions.push(openInstruction);
+  //     }
   
-      // Create deposit instruction
-      const depositInstruction = new TransactionInstruction({
-        programId: NEW_BOOST_PROGRAM_ID,
-        keys: [
-          { pubkey: staker, isSigner: true, isWritable: true },
-          { pubkey: new_boost_pda, isSigner: false, isWritable: true },
-          { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: staker_token_account, isSigner: false, isWritable: true },
-          { pubkey: new_stake_pda, isSigner: false, isWritable: true },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-        ],
-        data: Buffer.concat([Buffer.from([1]), amountBuffer]) // Deposit discriminator + amount
-      });
-      instructions.push(depositInstruction);
+  //     // Create deposit instruction
+  //     const depositInstruction = new TransactionInstruction({
+  //       programId: NEW_BOOST_PROGRAM_ID,
+  //       keys: [
+  //         { pubkey: staker, isSigner: true, isWritable: true },
+  //         { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+  //         { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
+  //         { pubkey: mint, isSigner: false, isWritable: false },
+  //         { pubkey: staker_token_account, isSigner: false, isWritable: true },
+  //         { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+  //         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+  //       ],
+  //       data: Buffer.concat([Buffer.from([1]), amountBuffer]) // Deposit discriminator + amount
+  //     });
+  //     instructions.push(depositInstruction);
   
-      return instructions;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-
-  
+  //     return instructions;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // };
 
 
+  
 
-  async function getAccountsData(connection, publicKey) {
-    // Build array of all accounts we need to fetch
-    const accountsToFetch = [];
+
+
+//   async function getAccountsData(connection, publicKey) {
+//     // Build array of all accounts we need to fetch
+//     const accountsToFetch = [];
     
-    // Add token accounts
-    TOKEN_LIST.forEach(token => {
-        if (token.mintAddress) {  // Skip SOL
-            const mintPublicKey = new PublicKey(token.mintAddress);
-            const tokenAccount = getAssociatedTokenAddressSync(
-                mintPublicKey,
-                publicKey,
-                false,
-                TOKEN_PROGRAM_ID
-            );
-            accountsToFetch.push(tokenAccount);
-        }
-    });
+//     // Add token accounts
+//     TOKEN_LIST.forEach(token => {
+//         if (token.mintAddress) {  // Skip SOL
+//             const mintPublicKey = new PublicKey(token.mintAddress);
+//             const tokenAccount = getAssociatedTokenAddressSync(
+//                 mintPublicKey,
+//                 publicKey,
+//                 false,
+//                 TOKEN_PROGRAM_ID
+//             );
+//             accountsToFetch.push(tokenAccount);
+//         }
+//     });
 
-    // Add boost and stake accounts
-    const BOOST_MINTS = [
-        '8H8rPiWW4iTFCfEkSnf7jpqeNpFfvdH9gLouAL3Fe2Zx',
-        'DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN',
-        '7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt',
-        'meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb',
-        'oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp',
-    ];
+//     // Add boost and stake accounts
+//     const BOOST_MINTS = [
+//         '8H8rPiWW4iTFCfEkSnf7jpqeNpFfvdH9gLouAL3Fe2Zx',
+//         'DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN',
+//         '7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt',
+//         'meUwDp23AaxhiNKaQCyJ2EAF2T4oe1gSkEkGXSRVdZb',
+//         'oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp',
+//     ];
 
-    BOOST_MINTS.forEach(mintAddress => {
-        const mint = new PublicKey(mintAddress);
-        const [boostAddress] = findBoostPDA(mint);
-        const [stakeAddress] = findStakePDA(publicKey, boostAddress);
-        accountsToFetch.push(boostAddress);
-        accountsToFetch.push(stakeAddress);
-    });
+//     BOOST_MINTS.forEach(mintAddress => {
+//         const mint = new PublicKey(mintAddress);
+//         const [boostAddress] = findBoostPDA(mint);
+//         const [stakeAddress] = findStakePDA(publicKey, boostAddress);
+//         accountsToFetch.push(boostAddress);
+//         accountsToFetch.push(stakeAddress);
+//     });
 
-    // Get SOL balance in same batch by adding publicKey
-    accountsToFetch.push(publicKey);
+//     // Get SOL balance in same batch by adding publicKey
+//     accountsToFetch.push(publicKey);
 
-    // Fetch all accounts in one request
-    const accounts = await connection.getMultipleAccountsInfo(accountsToFetch);
+//     // Fetch all accounts in one request
+//     const accounts = await connection.getMultipleAccountsInfo(accountsToFetch);
 
-    // Process results
-    const results = {
-        tokenBalances: {},
-        boostStakeInfo: [],
-        solBalance: 0
-    };
+//     // Process results
+//     const results = {
+//         tokenBalances: {},
+//         boostStakeInfo: [],
+//         solBalance: 0
+//     };
 
-    let accountIndex = 0;
+//     let accountIndex = 0;
 
-    // Process token accounts
-    TOKEN_LIST.forEach(token => {
-        if (token.mintAddress) {
-            const accountInfo = accounts[accountIndex++];
-            if (accountInfo) {
-                // Parse token account data
-                const data = Buffer.from(accountInfo.data);
-                // You'll need to implement parseTokenAccount based on SPL token account layout
-                const amount = parseTokenAccount(data);
-                results.tokenBalances[token.name] = amount;
-            } else {
-                results.tokenBalances[token.name] = 0;
-            }
-        }
-    });
+//     // Process token accounts
+//     TOKEN_LIST.forEach(token => {
+//         if (token.mintAddress) {
+//             const accountInfo = accounts[accountIndex++];
+//             if (accountInfo) {
+//                 // Parse token account data
+//                 const data = Buffer.from(accountInfo.data);
+//                 // You'll need to implement parseTokenAccount based on SPL token account layout
+//                 const amount = parseTokenAccount(data);
+//                 results.tokenBalances[token.name] = amount;
+//             } else {
+//                 results.tokenBalances[token.name] = 0;
+//             }
+//         }
+//     });
 
-    // Process boost and stake accounts
-    BOOST_MINTS.forEach(mintAddress => {
-        const boostAccount = accounts[accountIndex++];
-        const stakeAccount = accounts[accountIndex++];
+//     // Process boost and stake accounts
+//     BOOST_MINTS.forEach(mintAddress => {
+//         const boostAccount = accounts[accountIndex++];
+//         const stakeAccount = accounts[accountIndex++];
         
-        if (boostAccount && stakeAccount) {
-            const boost = decodeBoost(boostAccount.data);
-            const stake = decodeStake(stakeAccount.data, mintAddress);
+//         if (boostAccount && stakeAccount) {
+//             const boost = decodeBoost(boostAccount.data);
+//             const stake = decodeStake(stakeAccount.data, mintAddress);
             
-            results.boostStakeInfo.push({
-                mint: mintAddress,
-                boost,
-                stake
-            });
-        }
-    });
+//             results.boostStakeInfo.push({
+//                 mint: mintAddress,
+//                 boost,
+//                 stake
+//             });
+//         }
+//     });
 
-    // Process SOL balance
-    const solAccount = accounts[accountIndex];
-    if (solAccount) {
-        results.solBalance = solAccount.lamports / 1e9;
-    }
+//     // Process SOL balance
+//     const solAccount = accounts[accountIndex];
+//     if (solAccount) {
+//         results.solBalance = solAccount.lamports / 1e9;
+//     }
 
-    return results;
-}
+//     return results;
+// }
 
 function parseTokenAccount(data) {
   const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
@@ -853,70 +853,40 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
       toast.error("Please connect your wallet");
       return;
     }
-
+  
     const unstakeAmountFloat = parseFloat(amount);
     if (isNaN(unstakeAmountFloat) || unstakeAmountFloat <= 0) {
       toast.error("Please enter a valid amount to unstake.");
       return;
     }
-
+  
     try {
       setIsProcessing(true);
       const transaction = new Transaction();
-      const staker = publicKey;
       const mint = new PublicKey(mintAddress);
-
-      // Get the full staked balance before unstaking
-      const [boostAddress] = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
-      );
-      console.log (boostAddress);
-
-      const [stakePda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("stake"), publicKey.toBuffer(), boostAddress.toBuffer()],
-        new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
-      );
-      console.log (stakePda);
-
-      // const stakeAccountInfo = await connection.getAccountInfo(stakePda);
-      // if (!stakeAccountInfo) {
-      //   throw new Error("Stake account not found");
-      // }
-
-      // Calculate the actual unstake amount
-      let unstakeAmount = BigInt(Math.round(unstakeAmountFloat * 10 ** decimals));
       
-      // If trying to unstake full amount, show warning and adjust
-      const currentBalance = BigInt(Math.round(unstakeAmountFloat * 10 ** decimals));
-      if (unstakeAmount >= currentBalance) {
-        toast.info("A small amount will be left in the account for rent-exempt minimum");
-        unstakeAmount = unstakeAmount - BigInt(2000000); // Adjust rent-exempt minimum as needed
-      }
-
+      // Just convert the amount without any adjustments
+      const unstakeAmount = BigInt(Math.round(unstakeAmountFloat * 10 ** decimals));
+      
       const instruction = await createUnstakeBoostInstruction(
-        staker,
+        publicKey, // staker
         miner,
         mint,
         unstakeAmount
       );
+      
       transaction.add(instruction);
-
       const signature = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(signature, "confirmed");
-
+  
       toast.success("Unstake transaction sent successfully!");
     } catch (error) {
       console.error("Error unstaking boost:", error);
-      if (error.message?.includes("rent-exempt")) {
-        toast.error("Please leave a small amount for account rent");
-      } else {
-        toast.error("Error confirming unstaking boost. Please review totals for confirmation.");
-      }
+      toast.error(`Error unstaking: ${error.message}`);
     } finally {
       setIsProcessing(false);
     }
-}, [
+  }, [
     publicKey,
     sendTransaction,
     amount,
@@ -924,7 +894,7 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
     decimals,
     miner,
     connection,
-]);
+  ]);
 
 const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
   try {
@@ -1001,7 +971,11 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
     );
 
 
-    const deposit_address = getAssociatedTokenAddressSync(mint, boostPda, true);
+    const deposit_address = getAssociatedTokenAddressSync(
+      mint, 
+      boostPda,
+      true
+    );
 
     const config_proof_address = PublicKey.findProgramAddressSync(
       [Buffer.from("proof"), config_address.toBuffer()],
@@ -1014,7 +988,11 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
       true
     );
     
-    const staker_token_account = getAssociatedTokenAddressSync(mint, staker, true);
+    const staker_token_account = getAssociatedTokenAddressSync(
+      mint, 
+      staker,
+      false
+    );
 
     const boost_tokens_address = getAssociatedTokenAddressSync(
       mint,
