@@ -1000,7 +1000,7 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
     );
 
 
-    const deposit_address = getAssociatedTokenAddressSync(mint, boostPda);
+    const deposit_address = getAssociatedTokenAddressSync(mint, boostPda, true);
 
     const config_proof_address = PublicKey.findProgramAddressSync(
       [Buffer.from("proof"), config_address.toBuffer()],
@@ -1009,7 +1009,8 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
 
     const rewards_address = getAssociatedTokenAddressSync(
       mint,
-      config_address
+      config_address,
+      true
     );
     
     const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
@@ -1021,7 +1022,8 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
 
     const sender_address = getAssociatedTokenAddressSync(
       mint,
-      managed_proof_address
+      managed_proof_address,
+      true
     );
 
     // // Check if amount needs adjustment for rent-exempt minimum
