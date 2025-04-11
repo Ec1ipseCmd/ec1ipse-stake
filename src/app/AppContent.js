@@ -996,7 +996,8 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
 
     const treasury_tokens_address = getAssociatedTokenAddressSync(
       mint,
-      treasury_address
+      treasury_address,
+      true
     );
 
 
@@ -1013,7 +1014,8 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
       true
     );
     
-    const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
+    const staker_token_account = getAssociatedTokenAddressSync(mint, staker, true);
+
     const boost_tokens_address = getAssociatedTokenAddressSync(
       mint,
       boost_pda,
