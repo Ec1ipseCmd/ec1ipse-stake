@@ -872,18 +872,17 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
         new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
       );
       console.log (boostAddress);
-      
+
       const [stakePda] = PublicKey.findProgramAddressSync(
         [Buffer.from("stake"), publicKey.toBuffer(), boostAddress.toBuffer()],
         new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
       );
       console.log (stakePda);
-      console.log (stakeAccountInfo);
 
-      const stakeAccountInfo = await connection.getAccountInfo(stakePda);
-      if (!stakeAccountInfo) {
-        throw new Error("Stake account not found");
-      }
+      // const stakeAccountInfo = await connection.getAccountInfo(stakePda);
+      // if (!stakeAccountInfo) {
+      //   throw new Error("Stake account not found");
+      // }
 
       // Calculate the actual unstake amount
       let unstakeAmount = BigInt(Math.round(unstakeAmountFloat * 10 ** decimals));
@@ -1025,11 +1024,11 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
       managed_proof_address
     );
 
-    // Check if amount needs adjustment for rent-exempt minimum
-    const stakeAccountInfo = await connection.getAccountInfo(stake_pda);
-    if (!stakeAccountInfo) {
-      throw new Error("Stake account not found - Minimum");
-    }
+    // // Check if amount needs adjustment for rent-exempt minimum
+    // const stakeAccountInfo = await connection.getAccountInfo(stake_pda);
+    // if (!stakeAccountInfo) {
+    //   throw new Error("Stake account not found - Minimum");
+    // }
 
     // Create amount buffer with potentially adjusted amount
     const amountBuffer = Buffer.alloc(8);
