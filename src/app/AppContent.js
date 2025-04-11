@@ -930,7 +930,10 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
       "J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we"
     );
     const boostProgramId = new PublicKey(
-      "boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc"
+      "BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1"
+    );
+    const oreProgramId = new PublicKey(
+      "oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ"
     );
 
     const TOKEN_PROGRAM_ID = getTokenProgramId();
@@ -964,6 +967,11 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
       boostProgramId
     )[0];
 
+    const config_address = PublicKey.findProgramAddressSync(
+      [Buffer.from("config")],
+      boostProgramId
+    )[0];
+
     const stake_pda = PublicKey.findProgramAddressSync(
       [
         Buffer.from("stake"),
@@ -978,11 +986,40 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
       managed_proof_address,
       true
     );
+
+    const treasury_address = PublicKey.findProgramAddressSync(
+      [Buffer.from("treasury")],
+      oreProgramId
+    )[0];
+
+    const treasury_tokens_address = getAssociatedTokenAddressSync(
+      mint,
+      treasury_address
+    );
+
+
+    const deposit_address = getAssociatedTokenAddressSync(mint, boostPda);
+
+    const config_proof_address = PublicKey.findProgramAddressSync(
+      [Buffer.from("proof"), config_address.toBuffer()],
+        oreProgramId
+    )[0];
+
+    const rewards_address = getAssociatedTokenAddressSync(
+      mint,
+      config_address
+    );
+    
     const staker_token_account = getAssociatedTokenAddressSync(mint, staker);
     const boost_tokens_address = getAssociatedTokenAddressSync(
       mint,
       boost_pda,
       true
+    );
+
+    const sender_address = getAssociatedTokenAddressSync(
+      mint,
+      managed_proof_address
     );
 
     // Check if amount needs adjustment for rent-exempt minimum
@@ -1003,11 +1040,18 @@ const createUnstakeBoostInstruction = async (staker, miner, mint, amount) => {
         { pubkey: managed_proof_token_account, isSigner: false, isWritable: true },
         { pubkey: delegated_boost_address, isSigner: false, isWritable: true },
         { pubkey: boost_pda, isSigner: false, isWritable: true },
+        { pubkey: config_address, isSigner: false, isWritable: true },
+        { pubkey: deposit_address, isSigner: false, isWritable: true },
         { pubkey: mint, isSigner: false, isWritable: false },
+        { pubkey: config_proof_address, isSigner: false, isWritable: true },
+        { pubkey: rewards_address, isSigner: false, isWritable: true },
+        { pubkey: sender_address, isSigner: false, isWritable: true },
         { pubkey: staker_token_account, isSigner: false, isWritable: true },
-        { pubkey: boost_tokens_address, isSigner: false, isWritable: true },
         { pubkey: stake_pda, isSigner: false, isWritable: true },
         { pubkey: boostProgramId, isSigner: false, isWritable: false },
+        { pubkey: treasury_address, isSigner: false, isWritable: false },
+        { pubkey: treasury_tokens_address, isSigner: false, isWritable: true },
+        { pubkey: oreProgramId, isSigner: false, isWritable: false },
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       ],
       programId: programId,
