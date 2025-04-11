@@ -871,12 +871,14 @@ const createOreUnstake = async (withdrawer, mint, amount) => {
         [Buffer.from("boost"), mint.toBuffer()],
         new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
       );
+      console.log (boostAddress);
       
       const [stakePda] = PublicKey.findProgramAddressSync(
         [Buffer.from("stake"), publicKey.toBuffer(), boostAddress.toBuffer()],
         new PublicKey("BoostzzkNfCA9D1qNuN5xZxB5ErbK4zQuBeTHGDpXT1")
       );
       console.log (stakePda);
+      console.log (stakeAccountInfo);
 
       const stakeAccountInfo = await connection.getAccountInfo(stakePda);
       if (!stakeAccountInfo) {
