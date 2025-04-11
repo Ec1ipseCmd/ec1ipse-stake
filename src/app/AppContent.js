@@ -188,55 +188,55 @@ function AppContent() {
 
 
 
-  const handleMigration = useCallback(async () => {
-    if (!publicKey) {
-      toast.error("Please connect your wallet");
-      return;
-    }
+  // const handleMigration = useCallback(async () => {
+  //   if (!publicKey) {
+  //     toast.error("Please connect your wallet");
+  //     return;
+  //   }
   
-    const migrateAmountFloat = parseFloat(amount);
-    if (isNaN(migrateAmountFloat) || migrateAmountFloat <= 0) {
-      toast.error("Please enter a valid amount to migrate.");
-      return;
-    }
+  //   const migrateAmountFloat = parseFloat(amount);
+  //   if (isNaN(migrateAmountFloat) || migrateAmountFloat <= 0) {
+  //     toast.error("Please enter a valid amount to migrate.");
+  //     return;
+  //   }
   
-    try {
-      setIsProcessing(true);
-      const transaction = new Transaction();
-      const staker = publicKey;
-      const mint = new PublicKey(mintAddress);
-      const migrateAmount = BigInt(
-        Math.round(migrateAmountFloat * 10 ** decimals)
-      );
+  //   try {
+  //     setIsProcessing(true);
+  //     const transaction = new Transaction();
+  //     const staker = publicKey;
+  //     const mint = new PublicKey(mintAddress);
+  //     const migrateAmount = BigInt(
+  //       Math.round(migrateAmountFloat * 10 ** decimals)
+  //     );
   
-      const instructions = await createMigrationInstruction(
-        staker,
-        miner,
-        mint,
-        migrateAmount
-      );
+  //     const instructions = await createMigrationInstruction(
+  //       staker,
+  //       miner,
+  //       mint,
+  //       migrateAmount
+  //     );
       
-      instructions.forEach(instruction => transaction.add(instruction));
+  //     instructions.forEach(instruction => transaction.add(instruction));
       
-      const signature = await sendTransaction(transaction, connection);
-      await connection.confirmTransaction(signature, "confirmed");
+  //     const signature = await sendTransaction(transaction, connection);
+  //     await connection.confirmTransaction(signature, "confirmed");
 
-      toast.success("Migration transaction sent successfully!");
-    } catch (error) {
-      console.error("Error during migration:", error);
-      toast.error("Error during migration. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [
-    publicKey,
-    sendTransaction,
-    amount,
-    mintAddress,
-    decimals,
-    connection,
-    miner
-  ]);
+  //     toast.success("Migration transaction sent successfully!");
+  //   } catch (error) {
+  //     console.error("Error during migration:", error);
+  //     toast.error("Error during migration. Please try again.");
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // }, [
+  //   publicKey,
+  //   sendTransaction,
+  //   amount,
+  //   mintAddress,
+  //   decimals,
+  //   connection,
+  //   miner
+  // ]);
 
 
 
@@ -788,50 +788,50 @@ function parseTokenAccount(data) {
 
 
 
-const createOreUnstake = async (withdrawer, mint, amount) => {
-    try {
-      const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
-      const TOKEN_PROGRAM_ID = getTokenProgramId();
+// const createOreUnstake = async (withdrawer, mint, amount) => {
+//     try {
+//       const NEW_BOOST_PROGRAM_ID = new PublicKey("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
+//       const TOKEN_PROGRAM_ID = getTokenProgramId();
   
-      // PDAs for new boost program
-      const new_boost_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("boost"), mint.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      )[0];
+//       // PDAs for new boost program
+//       const new_boost_pda = PublicKey.findProgramAddressSync(
+//         [Buffer.from("boost"), mint.toBuffer()],
+//         NEW_BOOST_PROGRAM_ID
+//       )[0];
   
-      const new_stake_pda = PublicKey.findProgramAddressSync(
-        [Buffer.from("stake"), withdrawer.toBuffer(), new_boost_pda.toBuffer()],
-        NEW_BOOST_PROGRAM_ID
-      )[0];
+//       const new_stake_pda = PublicKey.findProgramAddressSync(
+//         [Buffer.from("stake"), withdrawer.toBuffer(), new_boost_pda.toBuffer()],
+//         NEW_BOOST_PROGRAM_ID
+//       )[0];
   
-      // Get token accounts
-      const withdrawer_token_account = getAssociatedTokenAddressSync(mint, withdrawer);
-      const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
+//       // Get token accounts
+//       const withdrawer_token_account = getAssociatedTokenAddressSync(mint, withdrawer);
+//       const new_boost_deposits_address = getAssociatedTokenAddressSync(mint, new_boost_pda, true);
   
-      // Create amount buffer
-      const amountBuffer = Buffer.alloc(8);
-      amountBuffer.writeBigUInt64LE(amount);
+//       // Create amount buffer
+//       const amountBuffer = Buffer.alloc(8);
+//       amountBuffer.writeBigUInt64LE(amount);
   
-      // Create withdraw instruction
-      const withdrawInstruction = new TransactionInstruction({
-        programId: NEW_BOOST_PROGRAM_ID,
-        keys: [
-          { pubkey: withdrawer, isSigner: true, isWritable: true },
-          { pubkey: withdrawer_token_account, isSigner: false, isWritable: true },
-          { pubkey: new_boost_pda, isSigner: false, isWritable: true },
-          { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: new_stake_pda, isSigner: false, isWritable: true },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-        ],
-        data: Buffer.concat([Buffer.from([6]), amountBuffer]) // Withdraw discriminator (6) + amount
-      });
+//       // Create withdraw instruction
+//       const withdrawInstruction = new TransactionInstruction({
+//         programId: NEW_BOOST_PROGRAM_ID,
+//         keys: [
+//           { pubkey: withdrawer, isSigner: true, isWritable: true },
+//           { pubkey: withdrawer_token_account, isSigner: false, isWritable: true },
+//           { pubkey: new_boost_pda, isSigner: false, isWritable: true },
+//           { pubkey: new_boost_deposits_address, isSigner: false, isWritable: true },
+//           { pubkey: mint, isSigner: false, isWritable: false },
+//           { pubkey: new_stake_pda, isSigner: false, isWritable: true },
+//           { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+//         ],
+//         data: Buffer.concat([Buffer.from([6]), amountBuffer]) // Withdraw discriminator (6) + amount
+//       });
   
-      return withdrawInstruction;
-    } catch (error) {
-      throw error;
-    }
-  };
+//       return withdrawInstruction;
+//     } catch (error) {
+//       throw error;
+//     }
+//   };
 
 
 
